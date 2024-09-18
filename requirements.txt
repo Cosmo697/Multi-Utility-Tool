@@ -1,0 +1,4 @@
+Pillow
+ffmpeg-python
+tkinterdnd2
+tk
