@@ -1,0 +1,10 @@
+ffmpeg-python
+tkinterdnd2
+tk
+ttkthemes
+pillow
+markdown
+pdfkit
+wordcloud
+PyPDF2
+weasyprint
