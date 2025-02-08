@@ -6,5 +6,10 @@ pillow
 markdown
 pdfkit
 wordcloud
-PyPDF2
 weasyprint
+python-docx
+pyyaml
+nvidia-ml-py3
+aiohttp
+beautifulsoup4
+PyPDF2

@@ -8,17 +8,16 @@ REM  - Installs dependencies from requirements.txt
 REM  - Launches the application (app.py)
 REM --------------------------------------------
 
-REM 1) Check if Python is available
-where python >nul 2>nul
+REM 1) Check for Python installation
+python --version
 IF %ERRORLEVEL% NEQ 0 (
-    echo "Python not found on PATH. Please install or add it to PATH."
+    echo "Python is not installed or not added to PATH."
     pause
     exit /b 1
 )
 
-REM 2) Check if venv folder exists
+REM 2) Create virtual environment if it doesn't exist
 IF NOT EXIST "venv" (
-    echo "No virtual environment found. Creating one..."
     python -m venv venv
     IF %ERRORLEVEL% NEQ 0 (
         echo "Error creating virtual environment."
@@ -35,7 +34,14 @@ IF %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-REM 4) Install dependencies
+REM 4) Check if requirements.txt exists
+IF NOT EXIST "requirements.txt" (
+    echo "requirements.txt not found."
+    pause
+    exit /b 1
+)
+
+REM 5) Install dependencies
 echo "Installing/Updating dependencies from requirements.txt..."
 pip install -r requirements.txt
 IF %ERRORLEVEL% NEQ 0 (
@@ -44,14 +50,21 @@ IF %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-REM 5) Run the app
+REM 6) Run the app
 echo "Launching the application..."
 python app.py
+IF %ERRORLEVEL% NEQ 0 (
+    echo "Application encountered an error."
+    pause
+    exit /b 1
+)
 echo "App finished with code %ERRORLEVEL%."
 pause
 
-REM Optional: Deactivate the environment after use
-echo "Application finished. Deactivating virtual environment."
-deactivate
+REM 7) Deactivate the virtual environment
+IF DEFINED VIRTUAL_ENV (
+    echo "Deactivating virtual environment."
+    deactivate
+)
 
 pause

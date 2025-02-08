@@ -1,72 +1,64 @@
-# README.md (Updated Version)
+# Multi-Utility Tool with Plugin Support
 
-## Multi-Utility Application
+This application is a multi-utility tool with a modular, plugin-based architecture. It allows you to process audio, image, text, and video files. The built-in tabs are implemented as the first set of plugins, and additional plugins can be added by dropping new modules into the `plugins/` directory.
 
-### Overview
-This project is a GUI-based multi-utility application built using Python and Tkinter. The application provides multiple tools for processing audio, image, text, and video files, all integrated into a single easy-to-use interface. The application is designed to run on Windows and provides drag-and-drop functionality for quick and convenient file handling.
+## Prerequisites
 
-### Features
-- **Audio Tab**: Tools for audio processing (conversion, extraction, etc.).
-- **Image Tab**: Tools for image editing (resize, crop, etc.).
-- **Text Tab**: Tools for text file manipulation (merging, deduplication, etc.).
-- **Video Tab**: Tools for video processing (frame extraction, format conversion, etc.).
-- **Multi-threaded Processing**: The app uses threads for long-running tasks to keep the interface responsive.
-- **Robust Logging**: Comprehensive logging for easier debugging and issue tracking.
+- Python 3.7 or later
+- Git (optional, for cloning the repository)
 
-### Installation
+## Installation
 
-#### Prerequisites
-- Python 3.7+
-- Pip (Python package manager)
+1. **Clone the Repository** (or download the source code)
+   git clone https://github.com/yourusername/multi_utility_app.git
+   cd multi_utility_app
 
-#### Setup
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/yourusername/multi-utility-application.git
-   ```
-2. Navigate into the project directory:
-   ```bash
-   cd multi-utility-application
-   ```
-3. Install the required packages:
-   ```bash
+2. **Create a Virtual Environment**
+   python -m venv venv
+
+3. **Activate the Virtual Environment**  
+   - On Windows:
+     venv\Scripts\activate
+
+   - On macOS and Linux:
+     source venv/bin/activate
+
+4. **Install Dependencies**
    pip install -r requirements.txt
-   ```
 
-### Requirements
-The following dependencies are listed in `requirements.txt`:
-- **Pillow**: Used for image manipulation.
-- **ffmpeg-python**: For handling video and audio processing.
-- **tkinterdnd2**: Provides drag-and-drop capabilities for the GUI.
+## Running the App
 
-### Running the Application
-To run the application, use the following command:
-```bash
+With the virtual environment activated, run the app using:
+
 python app.py
-```
 
-### File Structure
-- **app.py**: Main entry point for the GUI application.
-- **tabs.py**: Contains functions to set up individual tabs (Audio, Image, Text, Video) in the application.
-- **helpers.py**: Provides utility functions that are used across the application. Includes thread-safe queue operations and item processing utilities.
-- **utils/logging_config.py**: Sets up the logging configuration, which logs important information to both a file and the console for better tracking of events.
-- **requirements.txt**: Lists the required Python packages for the project.
+The application window will launch with the built-in plugin tabs (Audio, Image, Text, and Video). You can extend the app by adding additional plugin modules in the `plugins/` directory. Each plugin should implement a `register_plugin(plugin_api)` function to integrate with the core application.
 
-### Logging
-Logging is configured through the `logging_config.py` file:
-- **File Logging**: Logs are saved in `logs/app.log` for tracking important information and debugging.
-- **Console Logging**: Logs are also output to the console to help during development.
+## Adding New Plugins
 
-### How to Contribute
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-branch`).
-3. Make your changes and commit them (`git commit -m 'Add new feature'`).
-4. Push to the branch (`git push origin feature-branch`).
-5. Open a pull request.
+1. Create a new Python module (e.g., `my_plugin.py`) in the `plugins/` directory.
+2. Define a `register_plugin(plugin_api)` function in your module. Use the methods provided by the plugin API to add tabs, register hooks, or modify existing functionality.
 
-### License
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
+### Example:
 
-### Contact
-If you have any questions or suggestions, please feel free to reach out via email or open an issue in the repository.
+def register_plugin(plugin_api):
+    from tkinter import ttk
+    tab = ttk.Frame(plugin_api.app.notebook)
+    plugin_api.add_tab("My Plugin", tab)
+    label = ttk.Label(tab, text="Hello from My Plugin!")
+    label.pack(padx=10, pady=10)
+    # Additional functionality can be added here.
 
+## Logging
+
+The application logs messages to both the console and a log file located at `logs/app.log`.
+
+## Deactivating the Virtual Environment
+
+When you're done, deactivate the virtual environment with:
+
+deactivate
+
+## License
+
+© 2025 Mortl. Licensed under the MIT License.
