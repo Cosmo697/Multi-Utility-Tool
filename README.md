@@ -1,139 +1,141 @@
 # Multi-Utility Tool with Plugin Support
 
-The Multi-Utility Tool is a modular, cross‑platform application for processing various types of media and documents. Built with plugin support, it allows you to add new features, tabs, and enhancements without modifying the core code. The built‑in tabs (Audio, Image, Text, Video) are implemented as plugins, and an example HTML‑to‑PDF converter plugin is provided.
+The **Multi-Utility Tool** is a modular, cross-platform application for processing various types of media and documents. With built-in **plugin support**, new features, tabs, and enhancements can be added without modifying the core code. The default tabs (**Audio, Image, Text, Video**) are implemented as plugins, and an **HTML-to-PDF converter plugin** is included as an example.
 
 ## Features
 
-- **Plugin Architecture:**  
-  Easily extend or modify the app by adding plugins in the `plugins/` folder.  
-- **Media Processing:**  
-  Process audio, image, text, and video files with dedicated plugins.
-- **HTML-to-PDF Converter Plugin:**  
-  Convert documentation websites to a single PDF using asynchronous crawling and rendering.
-- **GPU Acceleration:**  
-  Video processing tasks automatically attempt to use GPU acceleration (with a CPU fallback).
-- **Progress & Logging:**  
-  Real‑time progress feedback and logging for all operations.
-- **Cancellation Support:**  
-  Cancel long‑running operations gracefully.
+### Plugin Architecture
+- Easily extend or modify the app by adding plugins to the `plugins/` folder.
+
+### Media Processing
+- Process **audio, image, text, and video files** using dedicated plugins.
+
+### HTML-to-PDF Converter Plugin
+- Convert documentation websites into a **single PDF** using asynchronous crawling and rendering.
+
+### GPU Acceleration
+- Video processing tasks **automatically use GPU acceleration**, with a CPU fallback when necessary.
+
+### Progress & Logging
+- Real-time progress feedback and logging for all operations.
+
+### Cancellation Support
+- Gracefully cancel long-running operations.
 
 ## Prerequisites
-
-- Python 3.7 or later  
-- Git (optional, for cloning the repository)  
-- Google Chrome (for the HTML‑to‑PDF Converter plugin; ensure its path is correctly set)
+- **Python 3.7** or later
+- **Git** (optional, for cloning the repository)
+- **Google Chrome** (required for the HTML-to-PDF Converter plugin)
 
 ## Installation
 
-1. **Clone the Repository:**
-
+1. Clone the Repository:
+   ```sh
    git clone https://github.com/yourusername/multi_utility_app.git
    cd multi_utility_app
-   
-Create a Virtual Environment:
-python -m venv venv
+   ```
 
-Activate the Virtual Environment:
-On Windows:
-venv\Scripts\activate
+2. Create a Virtual Environment:
+   ```sh
+   python -m venv venv
+   ```
 
-On macOS and Linux:
-source venv/bin/activate
+3. Activate the Virtual Environment:
+   - Windows:
+     ```sh
+     venv\Scripts\activate
+     ```
+   - macOS/Linux:
+     ```sh
+     source venv/bin/activate
+     ```
 
-Install Dependencies:
-pip install -r requirements.txt
+4. Install Dependencies:
+   ```sh
+   pip install -r requirements.txt
+   ```
 
-Running the App
+## Running the App
+
 With the virtual environment activated, launch the app:
-python app.py
+   ```sh
+   python app.py
+   ```
+The main window will open with **tabs for Audio, Image, Text, Video, and HTML-to-PDF Converter**.
 
-The main window will open with tabs for Audio, Image, Text, Video, and HTML to PDF Converter.
+## Plugin System Overview
 
-Plugin System Overview
-Plugins are Python modules placed in the plugins/ folder. Each plugin must define a function called register_plugin(plugin_api). The PluginAPI object passed to this function allows you to:
+Plugins are **Python modules** placed in the `plugins/` folder. Each plugin must define a function:
+   ```python
+   def register_plugin(plugin_api):
+       # Your plugin code here.
+   ```
+The **PluginAPI** object allows you to:
 
-Add a New Tab:
-Use plugin_api.add_tab(title, widget) to add a new tab to the main notebook.
+- Add a New Tab:
+  ```python
+  plugin_api.add_tab(title, widget)
+  ```
+  *(Creates a new tab in the main notebook.)*
 
-Register Hooks:
-Extend or modify core functionality by registering callbacks via plugin_api.register_hook(hook_name, callback).
+- Register Hooks:
+  ```python
+  plugin_api.register_hook(hook_name, callback)
+  ```
+  *(Modify core functionality by registering event callbacks.)*
 
-Access Core Components:
-Retrieve the main window using plugin_api.get_main_window() or interact with other UI elements through plugin_api.app.
+- Access Core Components:
+  ```python
+  plugin_api.get_main_window()
+  ```
+  *(Retrieve the main application window.)*
 
-Example Plugin: HTML-to-PDF Converter
-An example plugin named html_to_pdf_plugin.py is provided in the plugins/ folder. It creates its own tab and offers an asynchronous, GUI‑driven solution to convert documentation websites to a PDF.
+## Example Plugin: HTML-to-PDF Converter
 
-How It Works:
-Asynchronous Crawling:
-Uses aiohttp and asyncio to crawl documentation pages.
+The example `html_to_pdf_plugin.py` in `plugins/` creates its own tab and provides an **asynchronous, GUI-driven solution** to convert documentation websites into a PDF.
 
-Headless Chrome Rendering:
-Invokes Google Chrome in headless mode to print each page to PDF.
+### How It Works
+- Asynchronous Crawling: Uses `aiohttp` and `asyncio` to crawl pages.
+- Headless Chrome Rendering: Prints each page to PDF using **Google Chrome in headless mode**.
+- PDF Merging: Combines PDFs into one document using `PyPDF2`.
+- Progress Feedback & Cancellation: Displays a progress bar, logs, and a cancel option in the UI.
 
-PDF Merging:
-Merges individual PDFs into one final document using PyPDF2.
+## Plugin Developer Documentation
 
-Progress Feedback & Cancellation:
-Provides a progress bar, logging output, and a cancel option in the UI.
+### Creating a New Tab
+Example of adding a new tab in a plugin:
+   ```python
+   def register_plugin(plugin_api):
+       from tkinter import ttk
+       new_tab = ttk.Frame(plugin_api.app.notebook)
+       plugin_api.add_tab("My New Tab", new_tab)
+       
+       label = ttk.Label(new_tab, text="Hello from My New Tab!")
+       label.pack(padx=10, pady=10)
+   ```
 
-Plugin Developer Documentation
-To write a plugin for this app, please refer to the following guidelines:
+### Extending Existing Functionality
+Registering hooks to modify behavior:
+   ```python
+   def on_text_processed(file_path, result):
+       print(f"File processed: {file_path}")
+       
+   def register_plugin(plugin_api):
+       plugin_api.register_hook("text_processed", on_text_processed)
+   ```
 
-1. Plugin File & Naming
-Place your plugin in the plugins/ folder.
-Name your plugin file descriptively (e.g., my_plugin.py).
-The file must define a function:
-python
-
-def register_plugin(plugin_api):
-    # Your plugin code here.
-
-2. PluginAPI Methods
-Your plugin_api object provides these methods:
-
-add_tab(title: str, widget: tk.Widget)
-Adds a new tab to the main notebook.
-register_hook(hook_name: str, callback: callable)
-Registers a callback for a hook event (e.g., after processing a file).
-trigger_hook(hook_name: str, *args, **kwargs)
-(Advanced) Manually trigger a hook.
-get_main_window()
-Returns the main tkinter window.
-
-3. Creating a New Tab
-Example – creating a new tab:
-python
-
-def register_plugin(plugin_api):
-    from tkinter import ttk
-    new_tab = ttk.Frame(plugin_api.app.notebook)
-    plugin_api.add_tab("My New Tab", new_tab)
-    
-    label = ttk.Label(new_tab, text="Hello from My New Tab!")
-    label.pack(padx=10, pady=10)
-
-4. Extending Existing Functionality
-You can register hooks to modify behavior:
-python
-
-def on_text_processed(file_path, result):
-    print(f"File processed: {file_path}")
-
-def register_plugin(plugin_api):
-    plugin_api.register_hook("text_processed", on_text_processed)
-
-5. Modifying Layout or Design
+### Modifying Layout or Design
 Access the main window and change UI properties:
-python
+   ```python
+   def register_plugin(plugin_api):
+       root = plugin_api.get_main_window()
+       root.configure(background="#f0f0f0")
+   ```
 
-def register_plugin(plugin_api):
-    root = plugin_api.get_main_window()
-    root.configure(background="#f0f0f0")
-Updated Requirements
-The requirements.txt file includes all dependencies required by the core app and plugins:
+## Updated Requirements
 
-
+The `requirements.txt` includes all necessary dependencies:
+```
 ffmpeg-python
 tkinterdnd2
 tk
@@ -149,13 +151,17 @@ nvidia-ml-py3
 aiohttp
 beautifulsoup4
 PyPDF2
+```
 
-Contributing & Support
+## Contributing & Support
 
-Contributions:
-Pull requests and issues are welcome. Please follow the code style of the project.
-Support:
-Open an issue on GitHub if you encounter problems or have suggestions for new features.
+### Contributions
+Pull requests and issue reports are welcome. Please follow the project's coding style and contribution guidelines.
 
-License
+### Support
+If you encounter issues or have feature suggestions, open an issue on GitHub.
+
+## License
+
 © 2023 Your Name. Licensed under the MIT License.
+
