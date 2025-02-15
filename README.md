@@ -31,8 +31,8 @@ The **Multi-Utility Tool** is a modular, cross-platform application for processi
 
 1. Clone the Repository:
    ```sh
-   git clone https://github.com/yourusername/multi_utility_app.git
-   cd multi_utility_app
+   git clone https://github.com/Cosmo697/Multi-Utility-Tool.git
+   cd Multi-Utility-Tool
    ```
 
 2. Create a Virtual Environment:
