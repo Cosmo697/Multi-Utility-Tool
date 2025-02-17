@@ -55,9 +55,12 @@ def register_plugin(plugin_api):
     keep_quality_var = tk.BooleanVar(value=True)
     ttk.Checkbutton(opts_frame, text="Keep Original Quality", variable=keep_quality_var)\
         .grid(row=5, column=0, sticky=tk.W)
-    ttk.Label(opts_frame, text="Target Bitrate (k):").grid(row=5, column=1, sticky=tk.W)
-    bitrate_var = tk.StringVar(value="")
-    ttk.Entry(opts_frame, textvariable=bitrate_var, width=5)\
+    # Now working in Mbps
+    ttk.Label(opts_frame, text="Target Bitrate (Mbps):").grid(row=5, column=1, sticky=tk.W)
+    bitrate_options = ["1", "2", "3", "5", "8"]
+    bitrate_var = tk.StringVar(value="3")
+    ttk.Combobox(opts_frame, textvariable=bitrate_var,
+                 values=bitrate_options, state="readonly", width=5)\
         .grid(row=5, column=2, padx=5)
 
     extract_gif_var = tk.BooleanVar(value=False)
@@ -97,7 +100,7 @@ def register_plugin(plugin_api):
             'convert_video': convert_video_var.get(),
             'output_format': convert_format_var.get(),
             'keep_quality': keep_quality_var.get(),
-            'bitrate': bitrate_var.get(),
+            'bitrate': bitrate_var.get(),  # in Mbps
             'extract_gif': extract_gif_var.get(),
             'rotate_option': rotate_option_var.get(),
         }

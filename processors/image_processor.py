@@ -24,7 +24,6 @@ def process_single_image(file_path, resize_method, resize_pct, fixed_width, fixe
         img = Image.open(file_path)
         img = ImageOps.exif_transpose(img)
         if resize_method != "none":
-            img = crop_to_square(img)
             if resize_method == "percentage":
                 img = resize_image_percentage(img, resize_pct)
             elif resize_method == "fixed":
@@ -42,13 +41,6 @@ def process_single_image(file_path, resize_method, resize_pct, fixed_width, fixe
     except Exception as e:
         logger.error(f"Error processing image {file_path}: {e}")
         app.queue.put((file_path, "status", f"Error: {str(e)}"))
-
-def crop_to_square(img):
-    width, height = img.size
-    min_side = min(width, height)
-    left = (width - min_side) // 2
-    top = (height - min_side) // 2
-    return img.crop((left, top, left + min_side, top + min_side))
 
 def resize_image_percentage(img, pct):
     width, height = img.size

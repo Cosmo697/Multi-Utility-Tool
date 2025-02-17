@@ -1,11 +1,12 @@
 import os
 import logging
+from constants import OUTPUT_DIR
 
 logger = logging.getLogger(__name__)
 
 def ensure_file_output_dir(file_path):
     directory = os.path.dirname(file_path)
-    output_dir = os.path.join(directory, "output")
+    output_dir = os.path.join(directory, OUTPUT_DIR)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         logger.info(f"Created output directory: {output_dir}")

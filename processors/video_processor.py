@@ -15,7 +15,7 @@ def process_videos(files, options, app):
       - rotate_option (str): "None", "Rotate 90° CW", or "Rotate 90° CCW"
       - output_format (str): e.g. "mp4"
       - keep_quality (bool)
-      - bitrate (str)
+      - bitrate (str) -> interpreted in Mbps
       - extract_frames (bool)
       - frame_interval (int)
       - extract_audio (bool)
@@ -60,42 +60,60 @@ def process_video_conversion(file_path, options, app):
     if options.get('remove_audio'):
         audio_opts = ["-an"]
 
-    # Set video options.
-    if options.get('convert_video') or vf or (not options.get('keep_quality', True)):
-        if is_gpu_available():
-            video_opts = ["-c:v", "h264_nvenc", "-preset", "p4", "-cq", "18"]
-        else:
-            video_opts = ["-c:v", "libx264", "-preset", "veryslow", "-crf", "18"]
+    # Determine if re-encoding is necessary:
+    need_reencode = options.get('convert_video') or (vf is not None) or (not options.get('keep_quality', True))
+    if need_reencode:
+         # Use provided bitrate (in Mbps) if valid.
+         bitrate_str = options.get('bitrate', '').strip()
+         min_bitrate_mbps = 1  # minimum acceptable bitrate in Mbps
+         if bitrate_str.isdigit():
+              bitrate_val_mbps = int(bitrate_str)
+              if bitrate_val_mbps < min_bitrate_mbps:
+                   app.queue.put((file_path, "status", f"Provided bitrate ({bitrate_val_mbps} Mbps) is too low; using minimum {min_bitrate_mbps} Mbps."))
+                   bitrate_val_mbps = min_bitrate_mbps
+              # Convert Mbps to kbps (multiply by 1000) and format for ffmpeg
+              bitrate_val = f"{bitrate_val_mbps * 1000}k"
+              if is_gpu_available():
+                  video_opts = ["-c:v", "h264_nvenc", "-preset", "p4", "-b:v", bitrate_val]
+              else:
+                  video_opts = ["-c:v", "libx264", "-preset", "veryslow", "-b:v", bitrate_val]
+         else:
+              # Fallback to quality-based encoding.
+              if is_gpu_available():
+                  video_opts = ["-c:v", "h264_nvenc", "-preset", "p4", "-cq", "18"]
+              else:
+                  video_opts = ["-c:v", "libx264", "-preset", "veryslow", "-crf", "18"]
     else:
-        video_opts = ["-c:v", "copy"]
+         video_opts = ["-c:v", "copy"]
 
+    # Add video filter if needed.
     filter_opts = []
     if vf:
-        filter_opts = ["-vf", vf]
-        if video_opts == ["-c:v", "copy"]:
-            if is_gpu_available():
-                video_opts = ["-c:v", "h264_nvenc", "-preset", "p4", "-cq", "18"]
-            else:
-                video_opts = ["-c:v", "libx264", "-preset", "veryslow", "-crf", "18"]
+         filter_opts = ["-vf", vf]
+         if video_opts == ["-c:v", "copy"]:
+              if is_gpu_available():
+                  video_opts = ["-c:v", "h264_nvenc", "-preset", "p4", "-cq", "18"]
+              else:
+                  video_opts = ["-c:v", "libx264", "-preset", "veryslow", "-crf", "18"]
 
     base_name, ext = os.path.splitext(os.path.basename(file_path))
     output_format = options.get('output_format', ext.replace('.', ''))
     suffix = ""
     if options.get('remove_audio'):
-        suffix += "_noaudio"
+         suffix += "_noaudio"
     if vf:
-        suffix += "_rotated"
+         suffix += "_rotated"
     if options.get('convert_video'):
-        suffix += "_converted"
+         suffix += "_converted"
     out_dir = ensure_file_output_dir(file_path)
     output_file = generate_unique_file_path(out_dir, base_name, suffix, output_format)
 
     cmd = ["ffmpeg", "-i", file_path] + filter_opts + video_opts + audio_opts + [output_file]
     err = run_ffmpeg_command(cmd, "Error processing video")
     if not err:
-        app.queue.put((file_path, "status", f"Converted video saved: {output_file}"))
+         app.queue.put((file_path, "status", f"Converted video saved: {output_file}"))
     else:
-        app.queue.put((file_path, "status", f"Conversion error: {err}"))
+         app.queue.put((file_path, "status", f"Conversion error: {err}"))
 
 def extract_frames_from_video(file_path, interval, app):
     base_name, _ = os.path.splitext(os.path.basename(file_path))
@@ -110,9 +128,9 @@ def extract_frames_from_video(file_path, interval, app):
     ]
     err = run_ffmpeg_command(cmd, "Error extracting frames")
     if not err:
-        app.queue.put((file_path, "status", f"Frames extracted to: {out_dir}"))
+         app.queue.put((file_path, "status", f"Frames extracted to: {out_dir}"))
     else:
-        app.queue.put((file_path, "status", f"Frame extraction error: {err}"))
+         app.queue.put((file_path, "status", f"Frame extraction error: {err}"))
 
 def extract_audio_from_video(file_path, audio_fmt, app):
     base_name, _ = os.path.splitext(os.path.basename(file_path))
@@ -121,9 +139,9 @@ def extract_audio_from_video(file_path, audio_fmt, app):
     cmd = ["ffmpeg", "-i", file_path, "-q:a", "0", "-map", "a", out_file]
     err = run_ffmpeg_command(cmd, "Error extracting audio")
     if not err:
-        app.queue.put((file_path, "status", f"Audio extracted: {out_file}"))
+         app.queue.put((file_path, "status", f"Audio extracted: {out_file}"))
     else:
-        app.queue.put((file_path, "status", f"Audio extraction error: {err}"))
+         app.queue.put((file_path, "status", f"Audio extraction error: {err}"))
 
 def extract_gif_from_video(file_path, app):
     base_name, _ = os.path.splitext(os.path.basename(file_path))
@@ -136,9 +154,9 @@ def extract_gif_from_video(file_path, app):
     ]
     err = run_ffmpeg_command(cmd, "Error extracting GIF")
     if not err:
-        app.queue.put((file_path, "status", f"GIF extracted: {gif_file}"))
+         app.queue.put((file_path, "status", f"GIF extracted: {gif_file}"))
     else:
-        app.queue.put((file_path, "status", f"GIF extraction error: {err}"))
+         app.queue.put((file_path, "status", f"GIF extraction error: {err}"))
 
 def join_multiple_clips(files, options, app):
     """
@@ -155,22 +173,47 @@ def join_multiple_clips(files, options, app):
         joined_output = os.path.join(out_dir, f"joined_output.{output_format}")
         if options.get('convert_video'):
             if not options.get('keep_quality', True):
-                if is_gpu_available():
-                    cmd = [
-                        "ffmpeg", "-f", "concat", "-safe", "0",
-                        "-i", concat_file,
-                        "-c:v", "h264_nvenc", "-preset", "p4", "-cq", "18",
-                        "-c:a", "copy",
-                        joined_output
-                    ]
+                bitrate_str = options.get('bitrate', '').strip()
+                min_bitrate_mbps = 1
+                if bitrate_str.isdigit():
+                    bitrate_val_mbps = int(bitrate_str)
+                    if bitrate_val_mbps < min_bitrate_mbps:
+                        app.queue.put((files[0], "status", f"Provided bitrate ({bitrate_val_mbps} Mbps) is too low; using minimum {min_bitrate_mbps} Mbps."))
+                        bitrate_val_mbps = min_bitrate_mbps
+                    bitrate_val = f"{bitrate_val_mbps * 1000}k"
+                    if is_gpu_available():
+                        cmd = [
+                            "ffmpeg", "-f", "concat", "-safe", "0",
+                            "-i", concat_file,
+                            "-c:v", "h264_nvenc", "-preset", "p4", "-b:v", bitrate_val,
+                            "-c:a", "copy",
+                            joined_output
+                        ]
+                    else:
+                        cmd = [
+                            "ffmpeg", "-f", "concat", "-safe", "0",
+                            "-i", concat_file,
+                            "-c:v", "libx264", "-preset", "veryslow", "-b:v", bitrate_val,
+                            "-c:a", "copy",
+                            joined_output
+                        ]
                 else:
-                    cmd = [
-                        "ffmpeg", "-f", "concat", "-safe", "0",
-                        "-i", concat_file,
-                        "-c:v", "libx264", "-preset", "veryslow", "-crf", "18",
-                        "-c:a", "copy",
-                        joined_output
-                    ]
+                    if is_gpu_available():
+                        cmd = [
+                            "ffmpeg", "-f", "concat", "-safe", "0",
+                            "-i", concat_file,
+                            "-c:v", "h264_nvenc", "-preset", "p4", "-cq", "18",
+                            "-c:a", "copy",
+                            joined_output
+                        ]
+                    else:
+                        cmd = [
+                            "ffmpeg", "-f", "concat", "-safe", "0",
+                            "-i", concat_file,
+                            "-c:v", "libx264", "-preset", "veryslow", "-crf", "18",
+                            "-c:a", "copy",
+                            joined_output
+                        ]
             else:
                 cmd = [
                     "ffmpeg", "-f", "concat", "-safe", "0",
