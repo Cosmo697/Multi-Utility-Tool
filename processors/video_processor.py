@@ -2,6 +2,7 @@ import os
 import logging
 from utils.file_helpers import ensure_file_output_dir, generate_unique_file_path
 from utils.ffmpeg_helpers import run_ffmpeg_command, is_gpu_available
+from utils.diagnostics import increment_usage, time_block
 from constants import VALID_EXTENSIONS
 
 logger = logging.getLogger(__name__)
@@ -22,11 +23,13 @@ def process_videos(files, options, app):
       - audio_format (str)
       - extract_gif (bool)
     """
+    increment_usage("video")
     app.queue.put((None, "status", "Processing video files..."))
     app.start_progress()
     total = len(files)
     for i, f in enumerate(files, start=1):
-        process_single_video(f, options, app)
+        with time_block(f"video:{os.path.basename(f)}"):
+            process_single_video(f, options, app)
         app.increment_progress(i, total)
     app.queue.put((None, "done", "Video processing complete."))
 

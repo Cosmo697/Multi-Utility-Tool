@@ -1,16 +1,21 @@
 import os
 import logging
+
 from utils.file_helpers import ensure_file_output_dir, generate_unique_file_path
 from utils.ffmpeg_helpers import run_ffmpeg_command
+from utils.diagnostics import increment_usage, time_block
 
 logger = logging.getLogger(__name__)
 
 def process_audio_files(audio_files, output_format, bitrate, mono, remove_silence, normalize, app):
+    """Process a list of audio files with progress callbacks."""
+    increment_usage("audio")
     total = len(audio_files)
     app.queue.put((None, "status", "Processing audio files..."))
     app.start_progress()
     for i, file_path in enumerate(audio_files, start=1):
-        process_audio_file(file_path, output_format, bitrate, mono, remove_silence, normalize, app)
+        with time_block(f"audio:{os.path.basename(file_path)}"):
+            process_audio_file(file_path, output_format, bitrate, mono, remove_silence, normalize, app)
         app.increment_progress(i, total)
     app.queue.put((None, "done", "Audio processing complete."))
 

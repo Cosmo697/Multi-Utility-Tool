@@ -23,6 +23,29 @@ def register_plugin(plugin_api):
                                 values=audio_formats, state="readonly", width=10)
     format_combo.grid(row=0, column=1, padx=5, pady=2)
 
+    ttk.Label(options_frame, text="Quick Presets:").grid(row=0, column=2, sticky=tk.W, padx=5)
+    preset_var = tk.StringVar(value="Custom")
+    preset_combo = ttk.Combobox(options_frame, textvariable=preset_var,
+                                values=["Custom", "Podcast", "Voiceover"], state="readonly", width=10)
+    preset_combo.grid(row=0, column=3, padx=5)
+
+    def apply_preset(*_):
+        preset = preset_var.get()
+        if preset == "Podcast":
+            audio_format_var.set("mp3")
+            bitrate_var.set(128)
+            mono_var.set(True)
+            remove_silence_var.set(True)
+            normalize_var.set(True)
+        elif preset == "Voiceover":
+            audio_format_var.set("wav")
+            bitrate_var.set(192)
+            mono_var.set(True)
+            remove_silence_var.set(False)
+            normalize_var.set(True)
+
+    preset_var.trace_add("write", lambda *_: apply_preset())
+
     ttk.Label(options_frame, text="MP3 Bitrate (kbps):").grid(row=1, column=0, sticky=tk.W, padx=5)
     bitrate_var = tk.IntVar(value=192)
     bitrates = [96, 128, 192, 320]
