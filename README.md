@@ -13,6 +13,9 @@ The **Multi-Utility Tool** is a modular, cross-platform application for processi
 ### HTML-to-PDF Converter Plugin
 - Convert documentation websites into a **single PDF** using asynchronous crawling and rendering.
 
+### Archive Plugin
+- Quickly compress or extract `.zip` archives directly from the UI.
+
 ### GPU Acceleration
 - Video processing tasks **automatically use GPU acceleration**, with a CPU fallback when necessary.
 
@@ -152,6 +155,11 @@ aiohttp
 beautifulsoup4
 PyPDF2
 ```
+
+## Changelog
+
+- Added **Archive** plugin for compressing and extracting `.zip` files.
+- Fixed text merging bug and optimized word de-duplication logic.
 
 ## Contributing & Support
 
