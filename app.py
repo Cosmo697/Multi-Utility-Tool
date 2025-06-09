@@ -8,7 +8,6 @@ def main():
 
     with time_block("app_startup"):
         app = AppCore()
-    app.root.protocol("WM_DELETE_WINDOW", app.root.destroy)
     app.root.mainloop()
 
 if __name__ == "__main__":

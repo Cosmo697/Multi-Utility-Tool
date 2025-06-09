@@ -14,6 +14,8 @@ class PluginAgent:
         # expose hooks to the application for PluginAPI compatibility
         self.app.hooks = self.hooks
         self.api = PluginAPI(app)
+        # maintain backward compatibility with old code
+        self.app.plugin_api = self.api
         logger.info("Loading plugins")
         load_plugins(self.api)
 
