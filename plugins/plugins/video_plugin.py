@@ -78,7 +78,7 @@ def register_plugin(plugin_api):
 
     drop_frame = ttk.LabelFrame(tab, text="Drop Area")
     drop_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-    drop_area = create_drop_area(drop_frame, text_str="Drag & drop video files/folders here")
+    drop_area = create_drop_area(drop_frame, plugin_api, text_str="Drag & drop video files/folders here")
 
     def video_drop_event(e):
         paths = tab.tk.splitlist(e.data)
@@ -104,6 +104,7 @@ def register_plugin(plugin_api):
             'extract_gif': extract_gif_var.get(),
             'rotate_option': rotate_option_var.get(),
         }
+        drop_area.set_files(video_files)
         if join_var.get() and len(video_files) > 1:
             join_multiple_clips(video_files, options, plugin_api.app)
         else:

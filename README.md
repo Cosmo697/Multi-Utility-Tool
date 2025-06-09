@@ -1,6 +1,6 @@
 # Multi-Utility Tool with Plugin Support
 
-The **Multi-Utility Tool** is a modular, cross-platform application for processing various types of media and documents. With built-in **plugin support**, new features, tabs, and enhancements can be added without modifying the core code. The default tabs (**Audio, Image, Text, Video**) are implemented as plugins, and an **HTML-to-PDF converter plugin** is included as an example.
+The **Multi-Utility Tool** is a modular, cross-platform application for processing various types of media and documents. With built-in **plugin support**, new features, tabs, and enhancements can be added without modifying the core code. The default tabs (**Audio, Image, Text, Video, Archive, PDF Tools**) are implemented as plugins, and an **HTML-to-PDF converter plugin** is included as an example.
 
 ## Features
 
@@ -16,6 +16,9 @@ The **Multi-Utility Tool** is a modular, cross-platform application for processi
 ### Archive Plugin
 - Quickly compress or extract `.zip` archives directly from the UI.
 
+### PDF Tools Plugin
+- Merge multiple PDFs or extract page ranges from a document.
+
 ### GPU Acceleration
 - Video processing tasks **automatically use GPU acceleration**, with a CPU fallback when necessary.
 
@@ -24,6 +27,16 @@ The **Multi-Utility Tool** is a modular, cross-platform application for processi
 
 ### Cancellation Support
 - Gracefully cancel long-running operations.
+
+### Global Hotkeys
+- Assign custom shortcuts to start presets even when the app is in the background.
+
+### System Tray Mode
+- Minimizing hides the window and adds an icon with quick actions and notifications.
+
+### Context Menus
+- Right-click drop areas for actions like **Apply Preset**, **Open File Location**, and **Copy Path**.
+- Optional script `scripts/install_context_menu.py` adds a Windows Explorer entry for quick sending to the app.
 
 ## Prerequisites
 - **Python 3.7** or later
@@ -64,7 +77,7 @@ With the virtual environment activated, launch the app:
    ```sh
    python app.py
    ```
-The main window will open with **tabs for Audio, Image, Text, Video, and HTML-to-PDF Converter**.
+The main window will open with **tabs for Audio, Image, Text, Video, HTML-to-PDF Converter, Archive, and PDF Tools**.
 
 ## Plugin System Overview
 
@@ -154,11 +167,16 @@ nvidia-ml-py3
 aiohttp
 beautifulsoup4
 PyPDF2
+keyboard
+pystray
+pywin32
 ```
 
 ## Changelog
 
 - Added **Archive** plugin for compressing and extracting `.zip` files.
+- Added **PDF Tools** plugin for merging and splitting PDFs.
+- Added global hotkey support and system tray integration.
 - Fixed text merging bug and optimized word de-duplication logic.
 
 ## Contributing & Support

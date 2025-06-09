@@ -32,15 +32,69 @@ def find_files_in_folder(folder, valid_extensions=None):
     logger.info(f"Found {len(valid_files)} valid files in folder: {folder}")
     return valid_files
 
-def create_drop_area(parent, width=40, height=10, text_str="Drop files here"):
+def open_file_location(path):
+    """Open the folder containing the given file."""
+    import sys
+    import subprocess
+    folder = os.path.dirname(os.path.abspath(path))
+    try:
+        if sys.platform.startswith('win'):
+            os.startfile(folder)
+        elif sys.platform.startswith('darwin'):
+            subprocess.run(['open', folder], check=False)
+        else:
+            subprocess.run(['xdg-open', folder], check=False)
+    except Exception as exc:
+        logger.error("Failed to open folder %s: %s", folder, exc)
+
+def create_drop_area(parent, plugin_api=None, width=40, height=10, text_str="Drop files here"):
+    """Create a drop-enabled text widget with a context menu."""
     import tkinter as tk
     from tkinterdnd2 import DND_FILES
-    drop_area = tk.Text(parent, width=width, height=height, bg="#3e3e3e", fg="#d3d3d3")
-    drop_area.insert(tk.END, text_str)
-    drop_area.config(state=tk.DISABLED)
-    drop_area.pack(pady=10, fill=tk.BOTH, expand=True)
-    drop_area.drop_target_register(DND_FILES)
-    return drop_area
+
+    class DropArea(tk.Text):
+        def __init__(self, master):
+            super().__init__(master, width=width, height=height, bg="#3e3e3e", fg="#d3d3d3")
+            self.insert(tk.END, text_str)
+            self.config(state=tk.DISABLED)
+            self.pack(pady=10, fill=tk.BOTH, expand=True)
+            self.drop_target_register(DND_FILES)
+            self.files = []
+            self.menu = tk.Menu(self, tearoff=0)
+            self.menu.add_command(label="Apply Preset", command=self.apply_preset)
+            self.menu.add_command(label="Open File Location", command=self.open_location)
+            self.menu.add_command(label="Copy Path", command=self.copy_path)
+            self.menu.add_command(label="Edit Preset", command=self.edit_preset)
+            self.bind("<Button-3>", self.show_menu)
+
+        def set_files(self, files):
+            self.files = files
+
+        def show_menu(self, event):
+            state = tk.NORMAL if self.files else tk.DISABLED
+            for i in range(4):
+                self.menu.entryconfig(i, state=state)
+            self.menu.tk_popup(event.x_root, event.y_root)
+
+        def apply_preset(self):
+            if plugin_api and self.files:
+                plugin_api.trigger_hook("apply_preset", self.files)
+
+        def edit_preset(self):
+            if plugin_api and self.files:
+                plugin_api.trigger_hook("edit_preset", self.files)
+
+        def open_location(self):
+            if not self.files:
+                return
+            open_file_location(self.files[0])
+
+        def copy_path(self):
+            if self.files:
+                self.clipboard_clear()
+                self.clipboard_append(self.files[0])
+
+    return DropArea(parent)
 
 def read_file_content(file_path):
     ext = os.path.splitext(file_path)[1].lower()

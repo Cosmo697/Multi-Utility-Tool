@@ -37,7 +37,7 @@ def register_plugin(plugin_api):
 
     drop_frame = ttk.LabelFrame(tab, text="Drop Area")
     drop_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-    drop_area = create_drop_area(drop_frame, text_str="Drag & drop text files/folders here")
+    drop_area = create_drop_area(drop_frame, plugin_api, text_str="Drag & drop text files/folders here")
 
     def text_drop_event(e):
         paths = tab.tk.splitlist(e.data)
@@ -50,6 +50,7 @@ def register_plugin(plugin_api):
         if not text_files:
             messagebox.showerror("Error", "No valid text files found.")
             return
+        drop_area.set_files(text_files)
         t = threading.Thread(
             target=process_text_files,
             args=(text_files, merge_var.get(), deduplicate_var.get(),

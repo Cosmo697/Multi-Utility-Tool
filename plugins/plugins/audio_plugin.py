@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 import threading
 import logging
 from utils.file_helpers import find_files_in_folder, create_drop_area
@@ -64,7 +64,7 @@ def register_plugin(plugin_api):
 
     drop_frame = ttk.LabelFrame(tab, text="Drop Area")
     drop_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-    drop_area = create_drop_area(drop_frame, text_str="Drag & drop audio files/folders here")
+    drop_area = create_drop_area(drop_frame, plugin_api, text_str="Drag & drop audio files/folders here")
 
     def audio_drop_event(e):
         paths = tab.tk.splitlist(e.data)
@@ -77,6 +77,7 @@ def register_plugin(plugin_api):
         if not audio_files:
             messagebox.showerror("Error", "No valid audio files found.")
             return
+        drop_area.set_files(audio_files)
         t = threading.Thread(
             target=process_audio_files,
             args=(audio_files, audio_format_var.get(), bitrate_var.get(),
@@ -86,3 +87,28 @@ def register_plugin(plugin_api):
         t.start()
 
     drop_area.dnd_bind('<<Drop>>', audio_drop_event)
+
+    # preset definitions
+    def run_podcast_preset():
+        files = tk.filedialog.askopenfilenames(filetypes=[("Audio", "*.mp3;*.wav;*.flac")])
+        if not files:
+            return
+        threading.Thread(
+            target=process_audio_files,
+            args=(files, "mp3", 128, True, True, True, plugin_api.app),
+            daemon=True,
+        ).start()
+
+    def run_voiceover_preset():
+        files = tk.filedialog.askopenfilenames(filetypes=[("Audio", "*.wav;*.flac")])
+        if not files:
+            return
+        threading.Thread(
+            target=process_audio_files,
+            args=(files, "wav", 192, True, False, True, plugin_api.app),
+            daemon=True,
+        ).start()
+
+    plugin_api.register_hook("preset:Podcast", run_podcast_preset)
+    plugin_api.register_hook("preset:Voiceover", run_voiceover_preset)
+    plugin_api.register_hook("list_presets", lambda: ["Podcast", "Voiceover"])

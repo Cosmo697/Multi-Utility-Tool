@@ -93,7 +93,7 @@ def register_plugin(plugin_api):
 
     drop_frame = ttk.LabelFrame(tab, text="Drop Area")
     drop_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-    drop_area = create_drop_area(drop_frame, text_str="Drag & drop image files/folders here")
+    drop_area = create_drop_area(drop_frame, plugin_api, text_str="Drag & drop image files/folders here")
 
     def image_drop_event(e):
         paths = tab.tk.splitlist(e.data)
@@ -106,6 +106,7 @@ def register_plugin(plugin_api):
         if not image_files:
             messagebox.showerror("Error", "No valid image files found.")
             return
+        drop_area.set_files(image_files)
         t = threading.Thread(
             target=process_images,
             args=(image_files, resize_method_var.get(), resize_percentage_var.get(),

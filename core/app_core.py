@@ -6,6 +6,8 @@ from ttkthemes import ThemedStyle
 from tkinterdnd2 import TkinterDnD
 from core.hooks import Hooks
 from core.plugin_api import PluginAPI
+from core.hotkey_manager import HotkeyManager
+from core.tray_icon import TrayIcon
 from utils.logging_config import setup_logging
 from utils.diagnostics import get_usage_stats
 
@@ -19,8 +21,12 @@ class AppCore:
         self.queue = Queue()
         self.hooks = Hooks()
         self.plugin_api = PluginAPI(self)
+        self.hotkeys = HotkeyManager(self)
+        self.tray = TrayIcon(self)
         self.setup_ui()
         self.process_queue()
+        self.root.bind("<Unmap>", self._on_minimize)
+        self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
     def setup_ui(self):
         self.root.title("Multi-Utility Tool with Plugins")
@@ -37,6 +43,11 @@ class AppCore:
         file_menu.add_command(label="Usage Stats", command=self.show_stats)
         file_menu.add_command(label="Exit", command=self.root.quit)
         self.menu_bar.add_cascade(label="File", menu=file_menu)
+
+        tools_menu = tk.Menu(self.menu_bar, tearoff=0)
+        tools_menu.add_command(label="Hotkey Manager", command=self.hotkeys.open_manager)
+        self.menu_bar.add_cascade(label="Tools", menu=tools_menu)
+
         help_menu = tk.Menu(self.menu_bar, tearoff=0)
         help_menu.add_command(label="About", command=self.show_about)
         self.menu_bar.add_cascade(label="Help", menu=help_menu)
@@ -106,6 +117,7 @@ class AppCore:
                 elif msg_type == "done":
                     self.stop_progress()
                     self.update_status(payload)
+                    self.tray.notify(payload)
         except Empty:
             pass
         self.root.after(50, self.process_queue)
@@ -114,6 +126,15 @@ class AppCore:
         if total > 0:
             pct = (current / total) * 100
             self.queue.put((None, "progress", pct))
+
+    def _on_minimize(self, event=None):
+        if self.root.state() == 'iconic':
+            self.root.withdraw()
+            self.tray.show()
+
+    def _on_close(self):
+        self.tray.icon.stop()
+        self.root.destroy()
 
 # Logging handler for Tkinter text widget
 import logging
