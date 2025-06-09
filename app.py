@@ -4,6 +4,7 @@ from tkinterdnd2 import TkinterDnD
 from ttkthemes import ThemedStyle
 from core.app_core import AppCore
 from plugins.plugin_manager import load_plugins
+from utils.diagnostics import time_block
 
 def main():
     root = TkinterDnD.Tk()
@@ -21,9 +22,10 @@ def main():
     style.configure('TNotebook.Tab', background='#3e3e3e', foreground='#d3d3d3')
     
     logging.getLogger(__name__).info("Launching the Multi-Utility Tool with Plugins...")
-    
-    app = AppCore(root)
-    load_plugins(app.plugin_api)
+
+    with time_block("app_startup"):
+        app = AppCore(root)
+        load_plugins(app.plugin_api)
     root.protocol("WM_DELETE_WINDOW", root.destroy)
     root.mainloop()
 

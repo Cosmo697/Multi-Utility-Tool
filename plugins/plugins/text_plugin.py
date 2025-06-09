@@ -88,8 +88,14 @@ def register_plugin(plugin_api):
         preview_win = tk.Toplevel(tab)
         preview_win.title("File Preview")
         preview_win.geometry("600x400")
-        text_widget = tk.Text(preview_win, wrap='word')
-        text_widget.pack(expand=True, fill='both')
+        # enable undo/redo in text widget for quick edits
+        text_widget = tk.Text(preview_win, wrap="word", undo=True)
+        text_widget.pack(expand=True, fill="both")
         text_widget.insert(tk.END, content)
+
+        button_frame = ttk.Frame(preview_win)
+        button_frame.pack(fill=tk.X)
+        ttk.Button(button_frame, text="Undo", command=text_widget.edit_undo).pack(side=tk.LEFT, padx=2)
+        ttk.Button(button_frame, text="Redo", command=text_widget.edit_redo).pack(side=tk.LEFT, padx=2)
 
     ttk.Button(tab, text="Open File", command=open_file).pack(pady=5)

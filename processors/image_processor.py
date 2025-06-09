@@ -2,24 +2,66 @@ import os
 import logging
 from PIL import Image, ImageEnhance, ImageOps
 from utils.file_helpers import ensure_file_output_dir, generate_unique_file_path
+from utils.diagnostics import increment_usage, time_block
 
 logger = logging.getLogger(__name__)
 
-def process_images(files, resize_method, resize_pct, fixed_width, fixed_height, maintain_aspect,
-                   aspect_choice, margin, do_rename, rename_prefix, do_reformat, new_format, app):
+def process_images(
+    files,
+    resize_method,
+    resize_pct,
+    fixed_width,
+    fixed_height,
+    maintain_aspect,
+    aspect_choice,
+    margin,
+    do_rename,
+    rename_prefix,
+    do_reformat,
+    new_format,
+    app,
+):
+    """Process multiple images and provide progress updates."""
+    increment_usage("image")
     total = len(files)
     app.queue.put((None, "status", "Processing image files..."))
     app.start_progress()
     for i, f in enumerate(files, start=1):
-        process_single_image(f, resize_method, resize_pct, fixed_width, fixed_height,
-                             maintain_aspect, aspect_choice, margin, do_rename,
-                             rename_prefix, do_reformat, new_format, app)
+        with time_block(f"image:{os.path.basename(f)}"):
+            process_single_image(
+                f,
+                resize_method,
+                resize_pct,
+                fixed_width,
+                fixed_height,
+                maintain_aspect,
+                aspect_choice,
+                margin,
+                do_rename,
+                rename_prefix,
+                do_reformat,
+                new_format,
+                app,
+            )
         app.increment_progress(i, total)
     app.queue.put((None, "done", "Image processing complete."))
 
-def process_single_image(file_path, resize_method, resize_pct, fixed_width, fixed_height,
-                         maintain_aspect, aspect_choice, margin, do_rename, rename_prefix,
-                         do_reformat, new_format, app):
+def process_single_image(
+    file_path,
+    resize_method,
+    resize_pct,
+    fixed_width,
+    fixed_height,
+    maintain_aspect,
+    aspect_choice,
+    margin,
+    do_rename,
+    rename_prefix,
+    do_reformat,
+    new_format,
+    app,
+):
+    """Process a single image file."""
     try:
         img = Image.open(file_path)
         img = ImageOps.exif_transpose(img)

@@ -2,6 +2,7 @@ import os
 import sys
 import importlib.util
 import logging
+from utils.diagnostics import time_block
 
 logger = logging.getLogger(__name__)
 
@@ -27,11 +28,14 @@ def load_plugins(plugin_api, plugins_dir=None):
             spec = importlib.util.spec_from_file_location(module_name, module_path)
             module = importlib.util.module_from_spec(spec)
             try:
-                spec.loader.exec_module(module)
-                if hasattr(module, 'register_plugin'):
-                    module.register_plugin(plugin_api)
-                    logger.info(f"Plugin '{module_name}' loaded successfully.")
-                else:
-                    logger.warning(f"Plugin '{module_name}' does not have a register_plugin() function.")
+                with time_block(f"load_plugin:{module_name}"):
+                    spec.loader.exec_module(module)
+                    if hasattr(module, 'register_plugin'):
+                        module.register_plugin(plugin_api)
+                        logger.info(f"Plugin '{module_name}' loaded successfully.")
+                    else:
+                        logger.warning(
+                            f"Plugin '{module_name}' does not have a register_plugin() function."
+                        )
             except Exception as e:
                 logger.error(f"Error loading plugin '{module_name}': {e}")

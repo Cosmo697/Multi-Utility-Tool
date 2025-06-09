@@ -8,12 +8,16 @@ import csv
 import yaml
 from wordcloud import WordCloud
 from utils.file_helpers import ensure_file_output_dir, find_files_in_folder, generate_unique_file_path
+from utils.diagnostics import increment_usage, time_block
 from constants import VALID_EXTENSIONS
 
 logger = logging.getLogger(__name__)
 
-def process_text_files(files, merge_files, deduplicate, find_str, replace_str,
-                       convert_md, freq_stats, app):
+def process_text_files(
+    files, merge_files, deduplicate, find_str, replace_str, convert_md, freq_stats, app
+):
+    """Process multiple text files with optional transformations."""
+    increment_usage("text")
     app.queue.put((None, "status", "Processing text files..."))
     app.start_progress()
 
@@ -23,17 +27,21 @@ def process_text_files(files, merge_files, deduplicate, find_str, replace_str,
 
     for i, file_path in enumerate(files, start=1):
         try:
-            with open(file_path, 'r', encoding='utf-8', errors='replace') as infile:
-                content = infile.read().replace('\x00', '')
+            with time_block(f"text:{os.path.basename(file_path)}"):
+                with open(file_path, 'r', encoding='utf-8', errors='replace') as infile:
+                    content = infile.read().replace('\x00', '')
             if find_str:
                 content = content.replace(find_str, replace_str)
             if deduplicate:
                 words = content.split()
-                seen = []
+                # Deduplicate while preserving order using a set for O(n)
+                seen = set()
+                deduped = []
                 for w in words:
                     if w not in seen:
-                        seen.append(w)
-                content = " ".join(seen)
+                        seen.add(w)
+                        deduped.append(w)
+                content = " ".join(deduped)
             if merge_files:
                 master_content.append(content)
             else:
@@ -47,7 +55,7 @@ def process_text_files(files, merge_files, deduplicate, find_str, replace_str,
             if convert_md and file_path.lower().endswith(".md"):
                 convert_markdown(file_path, content, app)
         except Exception as e:
-            logger.error(f"Error processing {file_path}: {e}")
+            logger.error("Error processing %s: %s", file_path, e)
             app.queue.put((file_path, "status", f"Error: {str(e)}"))
         app.increment_progress(i, total)
 
