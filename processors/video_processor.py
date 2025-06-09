@@ -5,6 +5,20 @@ from utils.ffmpeg_helpers import run_ffmpeg_command, is_gpu_available
 from utils.diagnostics import increment_usage, time_block
 from constants import VALID_EXTENSIONS
 
+
+USE_GPU = is_gpu_available()
+
+def _encoder_opts(bitrate=None, quality='18'):
+    """Return ffmpeg encoding options based on hardware availability."""
+    if bitrate:
+        rate_opt = ['-b:v', bitrate]
+    else:
+        rate_opt = ['-cq', quality] if USE_GPU else ['-crf', quality]
+
+    codec = ['-c:v', 'h264_nvenc'] if USE_GPU else ['-c:v', 'libx264']
+    preset = ['-preset', 'p4'] if USE_GPU else ['-preset', 'veryslow']
+    return codec + preset + rate_opt
+
 logger = logging.getLogger(__name__)
 
 def process_videos(files, options, app):
@@ -64,40 +78,39 @@ def process_video_conversion(file_path, options, app):
         audio_opts = ["-an"]
 
     # Determine if re-encoding is necessary:
-    need_reencode = options.get('convert_video') or (vf is not None) or (not options.get('keep_quality', True))
+    need_reencode = (
+        options.get('convert_video')
+        or vf is not None
+        or not options.get('keep_quality', True)
+    )
+
     if need_reencode:
-         # Use provided bitrate (in Mbps) if valid.
-         bitrate_str = options.get('bitrate', '').strip()
-         min_bitrate_mbps = 1  # minimum acceptable bitrate in Mbps
-         if bitrate_str.isdigit():
-              bitrate_val_mbps = int(bitrate_str)
-              if bitrate_val_mbps < min_bitrate_mbps:
-                   app.queue.put((file_path, "status", f"Provided bitrate ({bitrate_val_mbps} Mbps) is too low; using minimum {min_bitrate_mbps} Mbps."))
-                   bitrate_val_mbps = min_bitrate_mbps
-              # Convert Mbps to kbps (multiply by 1000) and format for ffmpeg
-              bitrate_val = f"{bitrate_val_mbps * 1000}k"
-              if is_gpu_available():
-                  video_opts = ["-c:v", "h264_nvenc", "-preset", "p4", "-b:v", bitrate_val]
-              else:
-                  video_opts = ["-c:v", "libx264", "-preset", "veryslow", "-b:v", bitrate_val]
-         else:
-              # Fallback to quality-based encoding.
-              if is_gpu_available():
-                  video_opts = ["-c:v", "h264_nvenc", "-preset", "p4", "-cq", "18"]
-              else:
-                  video_opts = ["-c:v", "libx264", "-preset", "veryslow", "-crf", "18"]
+        bitrate_str = options.get('bitrate', '').strip()
+        min_bitrate_mbps = 1
+        if bitrate_str.isdigit():
+            bitrate_val_mbps = int(bitrate_str)
+            if bitrate_val_mbps < min_bitrate_mbps:
+                app.queue.put(
+                    (
+                        file_path,
+                        "status",
+                        f"Provided bitrate ({bitrate_val_mbps} Mbps) is too low; using minimum {min_bitrate_mbps} Mbps.",
+                    )
+                )
+                bitrate_val_mbps = min_bitrate_mbps
+            bitrate_val = f"{bitrate_val_mbps * 1000}k"
+            video_opts = _encoder_opts(bitrate=bitrate_val)
+        else:
+            video_opts = _encoder_opts()
     else:
-         video_opts = ["-c:v", "copy"]
+        video_opts = ["-c:v", "copy"]
 
     # Add video filter if needed.
     filter_opts = []
     if vf:
          filter_opts = ["-vf", vf]
          if video_opts == ["-c:v", "copy"]:
-              if is_gpu_available():
-                  video_opts = ["-c:v", "h264_nvenc", "-preset", "p4", "-cq", "18"]
-              else:
-                  video_opts = ["-c:v", "libx264", "-preset", "veryslow", "-crf", "18"]
+              video_opts = _encoder_opts()
 
     base_name, ext = os.path.splitext(os.path.basename(file_path))
     output_format = options.get('output_format', ext.replace('.', ''))
@@ -184,39 +197,25 @@ def join_multiple_clips(files, options, app):
                         app.queue.put((files[0], "status", f"Provided bitrate ({bitrate_val_mbps} Mbps) is too low; using minimum {min_bitrate_mbps} Mbps."))
                         bitrate_val_mbps = min_bitrate_mbps
                     bitrate_val = f"{bitrate_val_mbps * 1000}k"
-                    if is_gpu_available():
-                        cmd = [
-                            "ffmpeg", "-f", "concat", "-safe", "0",
-                            "-i", concat_file,
-                            "-c:v", "h264_nvenc", "-preset", "p4", "-b:v", bitrate_val,
-                            "-c:a", "copy",
-                            joined_output
-                        ]
-                    else:
-                        cmd = [
-                            "ffmpeg", "-f", "concat", "-safe", "0",
-                            "-i", concat_file,
-                            "-c:v", "libx264", "-preset", "veryslow", "-b:v", bitrate_val,
-                            "-c:a", "copy",
-                            joined_output
-                        ]
+                    cmd = [
+                        "ffmpeg",
+                        "-f",
+                        "concat",
+                        "-safe",
+                        "0",
+                        "-i",
+                        concat_file,
+                    ] + _encoder_opts(bitrate_val) + ["-c:a", "copy", joined_output]
                 else:
-                    if is_gpu_available():
-                        cmd = [
-                            "ffmpeg", "-f", "concat", "-safe", "0",
-                            "-i", concat_file,
-                            "-c:v", "h264_nvenc", "-preset", "p4", "-cq", "18",
-                            "-c:a", "copy",
-                            joined_output
-                        ]
-                    else:
-                        cmd = [
-                            "ffmpeg", "-f", "concat", "-safe", "0",
-                            "-i", concat_file,
-                            "-c:v", "libx264", "-preset", "veryslow", "-crf", "18",
-                            "-c:a", "copy",
-                            joined_output
-                        ]
+                    cmd = [
+                        "ffmpeg",
+                        "-f",
+                        "concat",
+                        "-safe",
+                        "0",
+                        "-i",
+                        concat_file,
+                    ] + _encoder_opts() + ["-c:a", "copy", joined_output]
             else:
                 cmd = [
                     "ffmpeg", "-f", "concat", "-safe", "0",

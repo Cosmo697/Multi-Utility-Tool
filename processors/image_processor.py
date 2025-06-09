@@ -4,6 +4,8 @@ from PIL import Image, ImageEnhance, ImageOps
 from utils.file_helpers import ensure_file_output_dir, generate_unique_file_path
 from utils.diagnostics import increment_usage, time_block
 
+DEFAULT_MARGIN = 16
+
 logger = logging.getLogger(__name__)
 
 def process_images(
@@ -113,7 +115,7 @@ def resize_image_fixed(img, fixed_width, fixed_height, maintain_aspect, aspect_c
         return img.resize((fixed_width, fixed_height), Image.LANCZOS)
 
 def add_image_inner_margin(img):
-    margin = 16
+    margin = DEFAULT_MARGIN
     width, height = img.size
     new_img = Image.new("RGB", (width, height), (255, 255, 255))
     new_img.paste(img.crop((margin, margin, width - margin, height - margin)), (margin, margin))
