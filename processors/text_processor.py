@@ -1,13 +1,15 @@
 import os
 import re
 import logging
+from collections import Counter
 import markdown
 import pdfkit
-import json
-import csv
-import yaml
 from wordcloud import WordCloud
-from utils.file_helpers import ensure_file_output_dir, generate_unique_file_path
+
+from utils.file_helpers import (
+    ensure_file_output_dir,
+    generate_unique_file_path,
+)
 from utils.diagnostics import increment_usage, time_block
 
 logger = logging.getLogger(__name__)
@@ -33,8 +35,7 @@ def process_text_files(
                 content = content.replace(find_str, replace_str)
             if deduplicate:
                 words = content.split()
-                from collections import OrderedDict
-                deduped = list(OrderedDict.fromkeys(words))
+                deduped = list(dict.fromkeys(words))
                 content = " ".join(deduped)
             if merge_files:
                 master_content.append(content)
@@ -68,7 +69,8 @@ def process_text_files(
     if freq_stats and all_words:
         try:
             out_dir = ensure_file_output_dir(files[0])
-            generate_word_stats_and_cloud(all_words, out_dir, app)
+            freq_counter = Counter(all_words)
+            generate_word_stats_and_cloud(freq_counter, out_dir, app)
         except Exception as e:
             logger.error(f"Error generating word stats: {e}")
             app.queue.put((None, "status", f"Word stats error: {str(e)}"))
@@ -90,16 +92,13 @@ def convert_markdown(file_path, content, app):
         logger.error(f"Error converting MD: {e}")
         app.queue.put((file_path, "status", f"MD convert error: {str(e)}"))
 
-def generate_word_stats_and_cloud(all_words, out_dir, app):
+def generate_word_stats_and_cloud(freq_counter, out_dir, app):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    freq_dict = {}
-    for w in all_words:
-        freq_dict[w] = freq_dict.get(w, 0) + 1
 
-    total_words = len(all_words)
-    unique_words = len(freq_dict)
-    sorted_words = sorted(freq_dict.items(), key=lambda x: x[1], reverse=True)
+    total_words = sum(freq_counter.values())
+    unique_words = len(freq_counter)
+    sorted_words = freq_counter.most_common()
 
     stats_file = generate_unique_file_path(out_dir, "word_stats", "", "txt")
     with open(stats_file, 'w', encoding='utf-8') as sf:
@@ -110,7 +109,7 @@ def generate_word_stats_and_cloud(all_words, out_dir, app):
             sf.write(f"{i}. {wd} = {cnt}\n")
 
     wc = WordCloud(width=800, height=400, background_color='white')
-    wc.generate_from_frequencies(freq_dict)
+    wc.generate_from_frequencies(freq_counter)
     wc_file = generate_unique_file_path(out_dir, "wordcloud", "", "png")
     wc.to_file(wc_file)
 
