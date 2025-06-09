@@ -42,7 +42,9 @@ def extract_archives(files: Iterable[str], app) -> None:
                 app.queue.put((file_path, "status", "Skipping non-zip file."))
                 continue
             out_dir = ensure_file_output_dir(file_path)
-            extract_dir = os.path.join(out_dir, os.path.splitext(os.path.basename(file_path))[0])
+            extract_dir = os.path.join(
+                out_dir, os.path.splitext(os.path.basename(file_path))[0]
+            )
             os.makedirs(extract_dir, exist_ok=True)
             with zipfile.ZipFile(file_path) as zf:
                 zf.extractall(extract_dir)
@@ -56,4 +58,3 @@ def process_archives(files: Iterable[str], action: str, output_name: str, app) -
     else:
         extract_archives(files, app)
     app.queue.put((None, "done", "Archive operation complete."))
-

@@ -5,6 +5,7 @@ from plugins.plugin_manager import load_plugins
 
 logger = logging.getLogger(__name__)
 
+
 class PluginAgent:
     """Manage hooks and load plugins."""
 

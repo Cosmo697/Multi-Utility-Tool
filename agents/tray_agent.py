@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw
 
 logger = logging.getLogger(__name__)
 
+
 class TrayAgent:
     """System tray integration with quick preset actions."""
 
@@ -34,7 +35,7 @@ class TrayAgent:
         menu = Menu(
             Item("Restore", self._restore),
             Item("Exit", self._exit),
-            Item("Presets", Menu(*preset_items))
+            Item("Presets", Menu(*preset_items)),
         )
         return menu
 

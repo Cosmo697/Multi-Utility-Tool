@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 CONFIG_KEY = "hotkeys"
 
+
 class HotkeyAgent:
     """Manage global hotkeys that trigger preset hooks."""
 
@@ -78,19 +79,28 @@ class HotkeyAgent:
             listbox.delete(0, tk.END)
             for hk, pre in self.hotkeys.items():
                 listbox.insert(tk.END, f"{hk} -> {pre}")
+
         refresh()
 
         btn_frame = ttk.Frame(win)
         btn_frame.pack(fill=tk.X, pady=5)
-        ttk.Button(btn_frame, text="Add", command=lambda: self._add_dialog(refresh)).pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="Remove", command=lambda: self._remove_selected(listbox, refresh)).pack(side=tk.LEFT)
+        ttk.Button(
+            btn_frame, text="Add", command=lambda: self._add_dialog(refresh)
+        ).pack(side=tk.LEFT, padx=5)
+        ttk.Button(
+            btn_frame,
+            text="Remove",
+            command=lambda: self._remove_selected(listbox, refresh),
+        ).pack(side=tk.LEFT)
 
     def _add_dialog(self, refresh) -> None:
         dlg = tk.Toplevel(self.app.root)
         dlg.title("Add Hotkey")
         tk.Label(dlg, text="Hotkey:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
         hk_var = tk.StringVar()
-        tk.Entry(dlg, textvariable=hk_var, width=15).grid(row=0, column=1, padx=5, pady=2)
+        tk.Entry(dlg, textvariable=hk_var, width=15).grid(
+            row=0, column=1, padx=5, pady=2
+        )
 
         tk.Label(dlg, text="Preset:").grid(row=1, column=0, sticky=tk.W, padx=5)
         presets = []
@@ -100,7 +110,9 @@ class HotkeyAgent:
             elif isinstance(result, (list, tuple)):
                 presets.extend(result)
         pre_var = tk.StringVar(value=presets[0] if presets else "")
-        ttk.Combobox(dlg, textvariable=pre_var, values=presets, state="readonly").grid(row=1, column=1, padx=5)
+        ttk.Combobox(dlg, textvariable=pre_var, values=presets, state="readonly").grid(
+            row=1, column=1, padx=5
+        )
 
         def save() -> None:
             hk = hk_var.get().strip()
@@ -111,7 +123,10 @@ class HotkeyAgent:
             self.add_hotkey(hk, pre)
             refresh()
             dlg.destroy()
-        ttk.Button(dlg, text="Save", command=save).grid(row=2, column=0, columnspan=2, pady=5)
+
+        ttk.Button(dlg, text="Save", command=save).grid(
+            row=2, column=0, columnspan=2, pady=5
+        )
 
     def _remove_selected(self, listbox, refresh) -> None:
         selection = listbox.curselection()

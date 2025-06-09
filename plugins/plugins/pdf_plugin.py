@@ -14,8 +14,12 @@ def register_plugin(plugin_api):
     plugin_api.add_tab("PDF Tools", tab)
 
     action_var = tk.StringVar(value="merge")
-    ttk.Radiobutton(tab, text="Merge", variable=action_var, value="merge").grid(row=0, column=0, sticky=tk.W, padx=5)
-    ttk.Radiobutton(tab, text="Split", variable=action_var, value="split").grid(row=0, column=1, sticky=tk.W, padx=5)
+    ttk.Radiobutton(tab, text="Merge", variable=action_var, value="merge").grid(
+        row=0, column=0, sticky=tk.W, padx=5
+    )
+    ttk.Radiobutton(tab, text="Split", variable=action_var, value="split").grid(
+        row=0, column=1, sticky=tk.W, padx=5
+    )
 
     name_var = tk.StringVar(value="output")
     ttk.Label(tab, text="Output Name:").grid(row=1, column=0, sticky=tk.W, padx=5)
@@ -32,7 +36,9 @@ def register_plugin(plugin_api):
     drop_frame = ttk.LabelFrame(tab, text="Drop Area")
     drop_frame.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
     tab.columnconfigure(1, weight=1)
-    drop_area = create_drop_area(drop_frame, plugin_api, text_str="Drag & drop PDF files here")
+    drop_area = create_drop_area(
+        drop_frame, plugin_api, text_str="Drag & drop PDF files here"
+    )
 
     def handle_drop(event):
         paths = tab.tk.splitlist(event.data)
@@ -42,10 +48,17 @@ def register_plugin(plugin_api):
             return
         drop_area.set_files(pdf_files)
         if action_var.get() == "merge":
-            threading.Thread(target=merge_pdfs, args=(pdf_files, name_var.get().strip() or "output", plugin_api.app), daemon=True).start()
+            threading.Thread(
+                target=merge_pdfs,
+                args=(pdf_files, name_var.get().strip() or "output", plugin_api.app),
+                daemon=True,
+            ).start()
         else:
             # use first file for split
-            threading.Thread(target=split_pdf, args=(pdf_files[0], start_var.get(), end_var.get(), plugin_api.app), daemon=True).start()
+            threading.Thread(
+                target=split_pdf,
+                args=(pdf_files[0], start_var.get(), end_var.get(), plugin_api.app),
+                daemon=True,
+            ).start()
 
     drop_area.dnd_bind("<<Drop>>", handle_drop)
-

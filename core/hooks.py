@@ -18,5 +18,6 @@ class Hooks:
                 results.append(callback(*args, **kwargs))
             except Exception as exc:
                 import logging
+
                 logging.getLogger(__name__).error("Hook %s failed: %s", hook_name, exc)
         return results
