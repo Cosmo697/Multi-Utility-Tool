@@ -7,9 +7,8 @@ import json
 import csv
 import yaml
 from wordcloud import WordCloud
-from utils.file_helpers import ensure_file_output_dir, find_files_in_folder, generate_unique_file_path
+from utils.file_helpers import ensure_file_output_dir, generate_unique_file_path
 from utils.diagnostics import increment_usage, time_block
-from constants import VALID_EXTENSIONS
 
 logger = logging.getLogger(__name__)
 
@@ -34,13 +33,8 @@ def process_text_files(
                 content = content.replace(find_str, replace_str)
             if deduplicate:
                 words = content.split()
-                # Deduplicate while preserving order using a set for O(n)
-                seen = set()
-                deduped = []
-                for w in words:
-                    if w not in seen:
-                        seen.add(w)
-                        deduped.append(w)
+                from collections import OrderedDict
+                deduped = list(OrderedDict.fromkeys(words))
                 content = " ".join(deduped)
             if merge_files:
                 master_content.append(content)
@@ -64,8 +58,8 @@ def process_text_files(
             merged = "\n---\n".join(master_content)
             out_dir = ensure_file_output_dir(files[0])
             merged_file = generate_unique_file_path(out_dir, "merged", "", "txt")
-            with open(merged_file, 'w', encoding='utf-8', errors='replace') as outf:
-                outf.write(merged)
+            with open(merged_file, 'w', encoding='utf-8', errors='replace') as mf:
+                mf.write(merged)
             app.queue.put((None, "status", f"Merged text saved: {merged_file}"))
         except Exception as e:
             logger.error(f"Error merging text files: {e}")
