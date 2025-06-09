@@ -1,6 +1,7 @@
 import logging
 from utils.logging_config import setup_logging
 
+
 class LoggerAgent:
     """Configure and expose application logging."""
 

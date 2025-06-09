@@ -7,6 +7,7 @@ from agents.tray_agent import TrayAgent
 
 logger = logging.getLogger(__name__)
 
+
 class AppCore:
     """Central coordinator that wires individual agents together."""
 

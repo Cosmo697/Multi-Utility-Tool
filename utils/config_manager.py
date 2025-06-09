@@ -1,4 +1,5 @@
 """Simple YAML-based configuration storage."""
+
 import os
 import yaml
 
