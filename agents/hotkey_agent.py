@@ -8,52 +8,64 @@ logger = logging.getLogger(__name__)
 
 CONFIG_KEY = "hotkeys"
 
-class HotkeyManager:
+class HotkeyAgent:
     """Manage global hotkeys that trigger preset hooks."""
 
-    def __init__(self, app):
+    def __init__(self, app) -> None:
         self.app = app
-        self.hotkeys = {}
+        self.hotkeys: dict[str, str] = {}
         self._load()
         self._register_all()
 
-    def _load(self):
+    def _load(self) -> None:
         cfg = load_config()
         self.hotkeys = cfg.get(CONFIG_KEY, {})
         logger.debug("Loaded hotkeys: %s", self.hotkeys)
 
-    def _save(self):
+    def _save(self) -> None:
         cfg = load_config()
         cfg[CONFIG_KEY] = self.hotkeys
         save_config(cfg)
         logger.debug("Saved hotkeys: %s", self.hotkeys)
 
-    def _register_all(self):
-        keyboard.unhook_all_hotkeys()
+    def _clear_hotkeys(self) -> None:
+        """Remove previously registered hotkeys in a version tolerant way."""
+        try:
+            keyboard.unhook_all_hotkeys()
+        except AttributeError:
+            try:
+                keyboard.clear_all_hotkeys()
+            except Exception as exc:  # pragma: no cover - best effort
+                logger.debug("Failed to clear hotkeys: %s", exc)
+        except Exception as exc:  # pragma: no cover - best effort
+            logger.debug("Failed to clear hotkeys: %s", exc)
+
+    def _register_all(self) -> None:
+        self._clear_hotkeys()
         for hk, preset in self.hotkeys.items():
             self._register(hk, preset)
 
-    def _register(self, hotkey, preset):
+    def _register(self, hotkey: str, preset: str) -> None:
         keyboard.add_hotkey(hotkey, lambda p=preset: self._trigger(p))
         logger.info("Registered hotkey %s for preset %s", hotkey, preset)
 
-    def _trigger(self, preset):
+    def _trigger(self, preset: str) -> None:
         logger.info("Hotkey triggered preset: %s", preset)
-        self.app.plugin_api.trigger_hook(f"preset:{preset}")
+        self.app.plugins.api.trigger_hook(f"preset:{preset}")
 
-    def add_hotkey(self, hotkey, preset):
+    def add_hotkey(self, hotkey: str, preset: str) -> None:
         self.hotkeys[hotkey] = preset
         self._register(hotkey, preset)
         self._save()
 
-    def remove_hotkey(self, hotkey):
+    def remove_hotkey(self, hotkey: str) -> None:
         if hotkey in self.hotkeys:
             keyboard.remove_hotkey(hotkey)
             del self.hotkeys[hotkey]
             self._save()
 
     # GUI Helpers
-    def open_manager(self):
+    def open_manager(self) -> None:
         win = tk.Toplevel(self.app.root)
         win.title("Hotkey Manager")
         listbox = tk.Listbox(win, width=40)
@@ -62,7 +74,7 @@ class HotkeyManager:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         listbox.config(yscrollcommand=scrollbar.set)
 
-        def refresh():
+        def refresh() -> None:
             listbox.delete(0, tk.END)
             for hk, pre in self.hotkeys.items():
                 listbox.insert(tk.END, f"{hk} -> {pre}")
@@ -73,7 +85,7 @@ class HotkeyManager:
         ttk.Button(btn_frame, text="Add", command=lambda: self._add_dialog(refresh)).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="Remove", command=lambda: self._remove_selected(listbox, refresh)).pack(side=tk.LEFT)
 
-    def _add_dialog(self, refresh):
+    def _add_dialog(self, refresh) -> None:
         dlg = tk.Toplevel(self.app.root)
         dlg.title("Add Hotkey")
         tk.Label(dlg, text="Hotkey:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
@@ -82,7 +94,7 @@ class HotkeyManager:
 
         tk.Label(dlg, text="Preset:").grid(row=1, column=0, sticky=tk.W, padx=5)
         presets = []
-        for result in self.app.plugin_api.collect("list_presets"):
+        for result in self.app.plugins.collect("list_presets"):
             if isinstance(result, dict):
                 presets.extend(result.keys())
             elif isinstance(result, (list, tuple)):
@@ -90,7 +102,7 @@ class HotkeyManager:
         pre_var = tk.StringVar(value=presets[0] if presets else "")
         ttk.Combobox(dlg, textvariable=pre_var, values=presets, state="readonly").grid(row=1, column=1, padx=5)
 
-        def save():
+        def save() -> None:
             hk = hk_var.get().strip()
             pre = pre_var.get().strip()
             if not hk or not pre:
@@ -101,7 +113,7 @@ class HotkeyManager:
             dlg.destroy()
         ttk.Button(dlg, text="Save", command=save).grid(row=2, column=0, columnspan=2, pady=5)
 
-    def _remove_selected(self, listbox, refresh):
+    def _remove_selected(self, listbox, refresh) -> None:
         selection = listbox.curselection()
         if not selection:
             return

@@ -6,10 +6,10 @@ from PIL import Image, ImageDraw
 
 logger = logging.getLogger(__name__)
 
-class TrayIcon:
+class TrayAgent:
     """System tray integration with quick preset actions."""
 
-    def __init__(self, app):
+    def __init__(self, app) -> None:
         self.app = app
         self.icon = pystray.Icon("MUT", self._create_image(), "Multi-Utility Tool")
         self.icon.menu = self._build_menu()
@@ -22,7 +22,7 @@ class TrayIcon:
 
     def _build_menu(self):
         preset_items = []
-        for result in self.app.plugin_api.collect("list_presets"):
+        for result in self.app.plugins.collect("list_presets"):
             if isinstance(result, dict):
                 for name in result.keys():
                     preset_items.append(Item(name, lambda _, n=name: self._trigger(n)))
@@ -38,7 +38,7 @@ class TrayIcon:
         )
         return menu
 
-    def show(self):
+    def show(self) -> None:
         threading.Thread(target=self.icon.run, daemon=True).start()
 
     def _restore(self, icon=None, item=None):
@@ -51,11 +51,11 @@ class TrayIcon:
         self.icon.stop()
         self.app.root.after(0, self.app.root.quit)
 
-    def _trigger(self, preset):
+    def _trigger(self, preset: str) -> None:
         logger.info("Tray preset triggered: %s", preset)
-        self.app.plugin_api.trigger_hook(f"preset:{preset}")
+        self.app.plugins.api.trigger_hook(f"preset:{preset}")
 
-    def notify(self, message):
+    def notify(self, message: str) -> None:
         try:
             self.icon.notify(message)
         except Exception:
