@@ -7,6 +7,12 @@ The **Multi-Utility Tool** is a modular, cross-platform application for processi
 ### Plugin Architecture
 - Easily extend or modify the app by adding plugins to the `plugins/` folder.
 
+### Agent-Based Design
+Core functionality is organized into small **agents** in the `agents/` package.
+Each agent handles one primary task (logging, plugin loading, hotkeys, tray
+integration, and the UI) and communicates via the `AppCore` coordinator.
+This structure keeps components loosely coupled and easy to test.
+
 ### Media Processing
 - Process **audio, image, text, and video files** using dedicated plugins.
 
@@ -30,6 +36,8 @@ The **Multi-Utility Tool** is a modular, cross-platform application for processi
 
 ### Global Hotkeys
 - Assign custom shortcuts to start presets even when the app is in the background.
+- Hotkey cleanup is version-tolerant to avoid errors with different
+  releases of the `keyboard` library.
 
 ### System Tray Mode
 - Minimizing hides the window and adds an icon with quick actions and notifications.
