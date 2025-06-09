@@ -34,7 +34,7 @@ def register_plugin(plugin_api):
     drop_frame = ttk.LabelFrame(tab, text="Drop Area")
     drop_frame.grid(row=2, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
     tab.columnconfigure(1, weight=1)
-    drop_area = create_drop_area(drop_frame, text_str="Drag & drop files/folders here")
+    drop_area = create_drop_area(drop_frame, plugin_api, text_str="Drag & drop files/folders here")
 
     def handle_drop(event):
         paths = tab.tk.splitlist(event.data)
@@ -42,6 +42,7 @@ def register_plugin(plugin_api):
             return
         action = action_var.get()
         output = browse_var.get() if action == "extract" else name_var.get().strip() or "archive"
+        drop_area.set_files(paths)
         threading.Thread(
             target=process_archives,
             args=(paths, action, output, plugin_api.app),

@@ -11,5 +11,8 @@ class PluginAPI:
     def trigger_hook(self, hook_name, *args, **kwargs):
         self.app.hooks.trigger(hook_name, *args, **kwargs)
 
+    def collect(self, hook_name, *args, **kwargs):
+        return self.app.hooks.collect(hook_name, *args, **kwargs)
+
     def get_main_window(self):
         return self.app.root

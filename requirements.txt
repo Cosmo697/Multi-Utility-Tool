@@ -13,3 +13,6 @@ nvidia-ml-py3
 aiohttp
 beautifulsoup4
 PyPDF2
+keyboard
+pystray
+pywin32
