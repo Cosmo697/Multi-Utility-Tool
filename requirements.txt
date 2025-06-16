@@ -1,18 +1,52 @@
-ffmpeg-python
-tkinterdnd2
+# Core dependencies
+pytest
 tk
-ttkthemes
-pillow
+pyyaml
+watchdog
+requests
+
+# Audio Separator plugin
+soundfile
+numpy
+scipy
+torch
+torchaudio
+deepfilternet3
+
+# File Organizer and general utilities
+
+# PDF plugin
+PyPDF2
+
+# Image plugin
+Pillow
+
+# Video plugin
+moviepy
+
+# Archive plugin
+py7zr
+
+# Text plugin
+python-docx
+openpyxl
 markdown
-pdfkit
 wordcloud
 weasyprint
-python-docx
-pyyaml
-nvidia-ml-py3
-aiohttp
 beautifulsoup4
-PyPDF2
-keyboard
+aiohttp
+
+# For hotkeys and tray
 pystray
+keyboard
 pywin32
+
+# HTML-to-PDF Converter plugin
+pdfkit
+
+# GUI enhancements
+ttkthemes
+tkinterdnd2
+
+# Other
+nvidia-ml-py3
