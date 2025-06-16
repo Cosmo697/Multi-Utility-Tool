@@ -1,46 +1,39 @@
 # Multi-Utility Tool with Plugin Support
 
-The **Multi-Utility Tool** is a modular, cross-platform application for processing various types of media and documents. With built-in **plugin support**, new features, tabs, and enhancements can be added without modifying the core code. The default tabs (**Audio, Image, Text, Video, Archive, PDF Tools**) are implemented as plugins, and an **HTML-to-PDF converter plugin** is included as an example.
+The **Multi-Utility Tool** is a modular, cross-platform application for processing and organizing media and documents. With built-in **plugin support**, new features, tabs, and enhancements can be added without modifying the core code. The default tabs (**Audio, Audio Separator, Image, Text, Video, Archive, PDF Tools, File Organizer, HTML-to-PDF Converter**) are implemented as plugins.
 
 ## Features
 
 ### Plugin Architecture
-- Easily extend or modify the app by adding plugins to the `plugins/` folder.
+- Easily extend or modify the app by adding plugins to the `plugins/` folder. Each plugin can add tabs, UI, and custom actions.
 
 ### Agent-Based Design
-Core functionality is organized into small **agents** in the `agents/` package.
-Each agent handles one primary task (logging, plugin loading, hotkeys, tray
-integration, and the UI) and communicates via the `AppCore` coordinator.
-This structure keeps components loosely coupled and easy to test.
+Core functionality is organized into small **agents** in the `agents/` package. Each agent handles one primary task (logging, plugin loading, hotkeys, tray integration, and the UI) and communicates via the `AppCore` coordinator. This structure keeps components loosely coupled and easy to test.
+
+### Major Plugins
+- **Audio Plugin**: Batch convert, normalize, and process audio files with presets for podcast and voiceover.
+- **Audio Separator Plugin**: Separate stems (vocals, drums, etc.) using Demucs, or denoise voice with DeepFilterNet3.
+- **Image Plugin**: Batch resize, reformat, and rename images with aspect ratio and margin options.
+- **Text Plugin**: Merge, deduplicate, search/replace, convert, and analyze text files (with Markdown, wordcloud, etc.).
+- **Video Plugin**: Extract frames/audio, join clips, convert formats, and more, with GPU acceleration.
+- **Archive Plugin**: Compress files/folders to ZIP or extract ZIP archives.
+- **PDF Tools Plugin**: Merge or split PDF files.
+- **File Organizer Plugin**: Organize, move, copy, rename, delete files, and find/delete duplicates with flexible options.
+- **HTML-to-PDF Converter Plugin**: Crawl documentation sites and render all pages to a single PDF using headless Chrome.
 
 ### Media Processing
 - Process **audio, image, text, and video files** using dedicated plugins.
 
-### HTML-to-PDF Converter Plugin
-- Convert documentation websites into a **single PDF** using asynchronous crawling and rendering.
-
-### Archive Plugin
-- Quickly compress or extract `.zip` archives directly from the UI.
-
-### PDF Tools Plugin
-- Merge multiple PDFs or extract page ranges from a document.
-
-### GPU Acceleration
-- Video processing tasks **automatically use GPU acceleration**, with a CPU fallback when necessary.
+### File Organization & Deduplication
+- Organize, move, copy, rename, and delete files in bulk.
+- Scan for and manage duplicate files with flexible options.
 
 ### Progress & Logging
 - Real-time progress feedback and logging for all operations.
 
-### Cancellation Support
-- Gracefully cancel long-running operations.
-
-### Global Hotkeys
+### Global Hotkeys & Tray
 - Assign custom shortcuts to start presets even when the app is in the background.
-- Hotkey cleanup is version-tolerant to avoid errors with different
-  releases of the `keyboard` library.
-
-### System Tray Mode
-- Minimizing hides the window and adds an icon with quick actions and notifications.
+- Minimize to system tray with quick actions and notifications.
 
 ### Context Menus
 - Right-click drop areas for actions like **Apply Preset**, **Open File Location**, and **Copy Path**.
@@ -58,12 +51,10 @@ This structure keeps components loosely coupled and easy to test.
    git clone https://github.com/Cosmo697/Multi-Utility-Tool.git
    cd Multi-Utility-Tool
    ```
-
 2. Create a Virtual Environment:
    ```sh
    python -m venv venv
    ```
-
 3. Activate the Virtual Environment:
    - Windows:
      ```sh
@@ -73,7 +64,6 @@ This structure keeps components loosely coupled and easy to test.
      ```sh
      source venv/bin/activate
      ```
-
 4. Install Dependencies:
    ```sh
    pip install -r requirements.txt
@@ -85,7 +75,7 @@ With the virtual environment activated, launch the app:
    ```sh
    python app.py
    ```
-The main window will open with **tabs for Audio, Image, Text, Video, HTML-to-PDF Converter, Archive, and PDF Tools**.
+The main window will open with **tabs for Audio, Audio Separator, Image, Text, Video, Archive, PDF Tools, File Organizer, and HTML-to-PDF Converter**.
 
 ## Plugin System Overview
 
@@ -178,10 +168,14 @@ PyPDF2
 keyboard
 pystray
 pywin32
+soundfile
+# and any other plugin-specific dependencies
 ```
 
 ## Changelog
 
+- Added **Audio Separator** plugin for stem separation and denoising.
+- Improved **File Organizer** with file management and deduplication.
 - Added **Archive** plugin for compressing and extracting `.zip` files.
 - Added **PDF Tools** plugin for merging and splitting PDFs.
 - Added global hotkey support and system tray integration.
@@ -197,5 +191,5 @@ If you encounter issues or have feature suggestions, open an issue on GitHub.
 
 ## License
 
-© 2023 Your Name. Licensed under the MIT License.
+© 2023-2025 Cosmo697. Licensed under the MIT License.
 
