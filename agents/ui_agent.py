@@ -170,5 +170,9 @@ class UIAgent:
             self.app.tray.show()
 
     def _on_close(self) -> None:
+        # Gracefully stop any running worker threads
+        for t in getattr(self.app, "threads", []):
+            if t.is_alive():
+                t.join(timeout=1)
         self.app.tray.icon.stop()
         self.root.destroy()

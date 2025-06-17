@@ -125,7 +125,10 @@ class AudioSeparatorUI:
             cmd.insert(1, f"--two-stems={self.target.get()}")
 
         self.console_dmx.delete("1.0", tk.END)
-        threading.Thread(target=run_command, args=(cmd, self.console_dmx, threading.Event()), daemon=True).start()
+        self.api.start_thread(
+            target=run_command,
+            args=(cmd, self.console_dmx, threading.Event()),
+        )
 
     def run_dpf(self):
         inp = self.dpf_in.get()
@@ -194,7 +197,7 @@ class AudioSeparatorUI:
             shutil.rmtree(tmpdir)
 
         self.console_dpf.delete("1.0", tk.END)
-        threading.Thread(target=chunk_process, daemon=True).start()
+        self.api.start_thread(target=chunk_process)
 
 def register_plugin(plugin_api):
     tab = ttk.Frame(plugin_api.app.notebook)

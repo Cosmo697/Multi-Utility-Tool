@@ -34,6 +34,7 @@ Core functionality is organized into small **agents** in the `agents/` package. 
 ### Global Hotkeys & Tray
 - Assign custom shortcuts to start presets even when the app is in the background.
 - Minimize to system tray with quick actions and notifications.
+- Worker threads are tracked and joined on exit for a clean shutdown.
 
 ### Context Menus
 - Right-click drop areas for actions like **Apply Preset**, **Open File Location**, and **Copy Path**.

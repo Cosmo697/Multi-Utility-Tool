@@ -220,7 +220,7 @@ This document provides a comprehensive code analysis of the Multi-Utility App pr
 - [x] Add `.gitignore` entry for `logs/*`.
 - [x] Refactor naming for PEP8 compliance across project.
 - [x] Implement or enforce plugin metadata (version, dependencies).
-- [ ] Track and gracefully shut down all threads on exit.
+- [x] Track and gracefully shut down all threads on exit.
 - [ ] Refactor all file paths to use `os.path.join` and user dirs.
 - [ ] Update documentation (`README.md`, `AGENTS.md`).
 - [ ] Expand and improve test coverage.
@@ -238,7 +238,6 @@ This document provides a comprehensive code analysis of the Multi-Utility App pr
 - `agents/logger_agent.py` and runtime log files are deleted.
 
 **Next Steps:**
-- Implement thread tracking and graceful shutdown in `app.py` and agents.
 - Refactor all file paths to use `os.path.join` and user directories (consider `appdirs`).
 - Update and sync documentation (`README.md`, `AGENTS.md`).
 - Expand and improve test coverage for all modules.

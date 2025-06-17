@@ -1,6 +1,5 @@
 """Simple archive creation and extraction plugin."""
 
-import threading
 import tkinter as tk
 from tkinter import ttk, filedialog
 
@@ -55,10 +54,9 @@ def register_plugin(plugin_api):
             else name_var.get().strip() or "archive"
         )
         drop_area.set_files(paths)
-        threading.Thread(
+        plugin_api.start_thread(
             target=process_archives,
             args=(paths, action, output, plugin_api.app),
-            daemon=True,
-        ).start()
+        )
 
     drop_area.dnd_bind("<<Drop>>", handle_drop)

@@ -16,3 +16,16 @@ class PluginAPI:
 
     def get_main_window(self):
         return self.app.root
+
+    def start_thread(self, *args, **kwargs):
+        """Start a daemon thread registered with the application."""
+        if hasattr(self.app, "start_thread"):
+            return self.app.start_thread(*args, **kwargs)
+        # Fallback for legacy app versions
+        import threading
+
+        thread = threading.Thread(*args, **kwargs, daemon=True)
+        thread.start()
+        if hasattr(self.app, "register_thread"):
+            self.app.register_thread(thread)
+        return thread

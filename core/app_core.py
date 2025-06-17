@@ -26,6 +26,15 @@ class AppCore:
     def register_thread(self, thread):
         self.threads.append(thread)
 
+    def start_thread(self, *args, **kwargs):
+        """Launch a daemon thread and register it for shutdown."""
+        import threading
+
+        thread = threading.Thread(*args, **kwargs, daemon=True)
+        thread.start()
+        self.register_thread(thread)
+        return thread
+
     # Delegate tab addition for plugins
     def add_plugin_tab(self, title, frame):
         self.ui.add_plugin_tab(title, frame)

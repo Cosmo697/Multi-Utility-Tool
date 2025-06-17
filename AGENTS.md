@@ -47,6 +47,7 @@ This application uses small self-contained agents to handle major features. Each
 - **Key Methods**:
   - `__init__()` – create each agent and finalize setup.
   - `add_plugin_tab(title, frame)` – delegate to `UIAgent.add_plugin_tab`.
+  - `start_thread(*args, **kwargs)` – launch a daemon thread tracked for shutdown.
 
 These agents are loosely coupled and interact through the main `AppCore` object which exposes shared resources like the Tk root window. Plugins interact with the system via `PluginAgent` and `PluginAPI`.
 
