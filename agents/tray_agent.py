@@ -1,7 +1,12 @@
 import threading
 import logging
-import pystray
-from pystray import MenuItem as Item, Menu
+try:
+    import pystray
+    from pystray import MenuItem as Item, Menu
+except Exception as e:  # noqa: BLE001
+    pystray = None
+    Item = Menu = None
+    logging.getLogger(__name__).warning("pystray not available: %s", e)
 from PIL import Image, ImageDraw
 
 logger = logging.getLogger(__name__)
@@ -12,8 +17,18 @@ class TrayAgent:
 
     def __init__(self, app) -> None:
         self.app = app
-        self.icon = pystray.Icon("MUT", self._create_image(), "Multi-Utility Tool")
-        self.icon.menu = self._build_menu()
+        if pystray is None:
+            logger.warning("Tray functionality disabled; pystray unavailable")
+            self.icon = None
+            return
+        try:
+            self.icon = pystray.Icon(
+                "MUT", self._create_image(), "Multi-Utility Tool"
+            )
+            self.icon.menu = self._build_menu()
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Failed to initialize tray icon: %s", e)
+            self.icon = None
 
     def _create_image(self):
         image = Image.new("RGB", (64, 64), "black")
@@ -40,17 +55,24 @@ class TrayAgent:
         return menu
 
     def show(self) -> None:
+        if self.icon is None:
+            logger.debug("Tray icon disabled; not showing")
+            return
         if hasattr(self.app, "start_thread"):
             self.app.start_thread(target=self.icon.run)
         else:  # fallback
             threading.Thread(target=self.icon.run, daemon=True).start()
 
     def _restore(self, icon=None, item=None):
+        if not self.icon:
+            return
         logger.info("Restoring window from tray")
         self.icon.stop()
         self.app.root.after(0, self.app.root.deiconify)
 
     def _exit(self, icon=None, item=None):
+        if not self.icon:
+            return
         logger.info("Exiting from tray menu")
         self.icon.stop()
         self.app.root.after(0, self.app.root.quit)
@@ -60,6 +82,9 @@ class TrayAgent:
         self.app.plugins.api.trigger_hook(f"preset:{preset}")
 
     def notify(self, message: str) -> None:
+        if not self.icon:
+            logger.debug("Tray icon not initialized; notification skipped")
+            return
         try:
             self.icon.notify(message)
         except Exception:

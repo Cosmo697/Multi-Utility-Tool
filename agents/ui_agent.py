@@ -46,6 +46,8 @@ class UIAgent:
         self.style.configure(
             "TNotebook.Tab", background="#3e3e3e", foreground="#d3d3d3"
         )
+        # Hide tab bar for a cleaner look; navigation handled by sidebar
+        self.style.layout("TNotebook.Tab", [])
 
         self.queue: Queue = Queue()
         self.plugin_tabs: dict[str, tk.Frame] = {}
@@ -60,12 +62,24 @@ class UIAgent:
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
     def setup_tabs(self) -> None:
-        self.notebook = ttk.Notebook(self.root)
-        self.notebook.pack(expand=True, fill="both")
+        container = ttk.Frame(self.root)
+        container.pack(expand=True, fill="both")
+        self.sidebar = tk.Listbox(container, exportselection=False, width=20)
+        self.sidebar.pack(side=tk.LEFT, fill=tk.Y)
+        self.sidebar.bind("<<ListboxSelect>>", self._on_plugin_select)
+        self.notebook = ttk.Notebook(container)
+        self.notebook.pack(side=tk.RIGHT, expand=True, fill="both")
 
     def add_plugin_tab(self, title: str, frame: tk.Frame) -> None:
         self.notebook.add(frame, text=title)
+        self.sidebar.insert(tk.END, title)
         self.plugin_tabs[title] = frame
+
+    def _on_plugin_select(self, event=None) -> None:
+        idx = self.sidebar.curselection()
+        if not idx:
+            return
+        self.notebook.select(idx[0])
 
     def setup_menu(self) -> None:
         self.menu_bar = tk.Menu(self.root)
@@ -130,6 +144,10 @@ class UIAgent:
             "About", "Multi-Utility Tool with Plugin Support\nVersion 1.0\n© 2023"
         )
 
+    def show_error(self, message: str) -> None:
+        messagebox.showerror("Error", message)
+        logger.error(message)
+
     def update_status(self, message: str) -> None:
         self.status_var.set(message)
         logger.info(message)
@@ -155,6 +173,8 @@ class UIAgent:
                     self.stop_progress()
                     self.update_status(payload)
                     self.app.tray.notify(payload)
+                elif msg_type == "error":
+                    self.show_error(payload)
         except Empty:
             pass
         self.root.after(50, self.process_queue)
@@ -174,5 +194,6 @@ class UIAgent:
         for t in getattr(self.app, "threads", []):
             if t.is_alive():
                 t.join(timeout=1)
-        self.app.tray.icon.stop()
+        if getattr(self.app.tray, "icon", None):
+            self.app.tray.icon.stop()
         self.root.destroy()
