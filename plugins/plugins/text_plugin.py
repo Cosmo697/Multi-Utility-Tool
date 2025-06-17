@@ -2,10 +2,6 @@ import os
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import logging
-import markdown
-import json
-import csv
-import yaml
 from utils.file_helpers import create_drop_area, find_files_in_folder, read_file_content
 from constants import VALID_EXTENSIONS
 from processors.text_processor import process_text_files

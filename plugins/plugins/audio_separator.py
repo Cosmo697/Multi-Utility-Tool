@@ -173,7 +173,7 @@ class App(tk.Tk):
                     self.console_dpf.insert(tk.END, f"❌ Chunk {i + 1} failed to produce output.\n\n")
 
             if not outputs:
-                self.console_dpf.insert(tk.END, f"❌ No chunks processed successfully. Aborting.\n")
+                self.console_dpf.insert(tk.END, "❌ No chunks processed successfully. Aborting.\n")
                 return
 
             self.console_dpf.insert(tk.END, f"\n🔄 Reassembling {len(outputs)} chunks...\n")
