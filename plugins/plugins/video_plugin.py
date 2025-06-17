@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import logging
 from concurrent.futures import ThreadPoolExecutor
-import threading
 from utils.file_helpers import create_drop_area, find_files_in_folder
 from constants import VALID_EXTENSIONS
 from processors.video_processor import process_videos, join_multiple_clips

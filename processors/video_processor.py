@@ -3,7 +3,6 @@ import logging
 from utils.file_helpers import ensure_file_output_dir, generate_unique_file_path
 from utils.ffmpeg_helpers import run_ffmpeg_command, is_gpu_available
 from utils.diagnostics import increment_usage, time_block
-from constants import VALID_EXTENSIONS
 
 
 USE_GPU = is_gpu_available()

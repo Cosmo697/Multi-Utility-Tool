@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox
 import logging
 from utils.file_helpers import find_files_in_folder, create_drop_area
 from constants import VALID_EXTENSIONS
