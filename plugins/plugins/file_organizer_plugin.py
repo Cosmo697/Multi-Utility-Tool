@@ -255,7 +255,7 @@ class OrganizerUI:
             "interval": self.interval.get(),
         }
         _save_prefs(data)
-        threading.Thread(target=self._scan, daemon=True).start()
+        self.api.start_thread(target=self._scan)
 
     def _scan(self):
         self.api.trigger_hook("organizer_pre_scan", self.paths)

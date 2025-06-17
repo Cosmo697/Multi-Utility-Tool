@@ -40,7 +40,10 @@ class TrayAgent:
         return menu
 
     def show(self) -> None:
-        threading.Thread(target=self.icon.run, daemon=True).start()
+        if hasattr(self.app, "start_thread"):
+            self.app.start_thread(target=self.icon.run)
+        else:  # fallback
+            threading.Thread(target=self.icon.run, daemon=True).start()
 
     def _restore(self, icon=None, item=None):
         logger.info("Restoring window from tray")

@@ -1,7 +1,6 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-import threading
 import logging
 import markdown
 import json
@@ -68,7 +67,7 @@ def register_plugin(plugin_api):
             messagebox.showerror("Error", "No valid text files found.")
             return
         drop_area.set_files(text_files)
-        t = threading.Thread(
+        plugin_api.start_thread(
             target=process_text_files,
             args=(
                 text_files,
@@ -80,9 +79,7 @@ def register_plugin(plugin_api):
                 freq_stats_var.get(),
                 plugin_api.app,
             ),
-            daemon=True,
         )
-        t.start()
 
     drop_area.dnd_bind("<<Drop>>", text_drop_event)
 

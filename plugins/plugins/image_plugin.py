@@ -1,7 +1,6 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
-import threading
 import logging
 from utils.file_helpers import find_files_in_folder, create_drop_area
 from constants import VALID_EXTENSIONS
@@ -166,7 +165,7 @@ def register_plugin(plugin_api):
             messagebox.showerror("Error", "No valid image files found.")
             return
         drop_area.set_files(image_files)
-        t = threading.Thread(
+        plugin_api.start_thread(
             target=process_images,
             args=(
                 image_files,
@@ -183,8 +182,6 @@ def register_plugin(plugin_api):
                 new_format_var.get(),
                 plugin_api.app,
             ),
-            daemon=True,
         )
-        t.start()
 
     drop_area.dnd_bind("<<Drop>>", image_drop_event)

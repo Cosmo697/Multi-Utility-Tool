@@ -300,9 +300,10 @@ class HtmlToPdfPlugin(ttk.Frame):
         self.log_text.delete(1.0, tk.END)
         self.progress_bar["value"] = 0
         self.cancel_event = threading.Event()
-        threading.Thread(
-            target=self.run_generate, args=(url, out_filename, chrome_path), daemon=True
-        ).start()
+        self.api.start_thread(
+            target=self.run_generate,
+            args=(url, out_filename, chrome_path),
+        )
 
     def on_cancel(self):
         if self.cancel_event:

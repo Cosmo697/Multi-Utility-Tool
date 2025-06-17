@@ -1,7 +1,6 @@
 """PDF merging and splitting plugin."""
 
 import os
-import threading
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -48,17 +47,15 @@ def register_plugin(plugin_api):
             return
         drop_area.set_files(pdf_files)
         if action_var.get() == "merge":
-            threading.Thread(
+            plugin_api.start_thread(
                 target=merge_pdfs,
                 args=(pdf_files, name_var.get().strip() or "output", plugin_api.app),
-                daemon=True,
-            ).start()
+            )
         else:
             # use first file for split
-            threading.Thread(
+            plugin_api.start_thread(
                 target=split_pdf,
                 args=(pdf_files[0], start_var.get(), end_var.get(), plugin_api.app),
-                daemon=True,
-            ).start()
+            )
 
     drop_area.dnd_bind("<<Drop>>", handle_drop)
