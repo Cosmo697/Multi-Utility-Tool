@@ -7,6 +7,16 @@ from utils.file_helpers import find_files_in_folder, create_drop_area
 from constants import VALID_EXTENSIONS
 from processors.image_processor import process_images
 
+PLUGIN_MANIFEST = {
+    "plugin_id": "image",
+    "name": "Image Studio",
+    "description": "Resize, reformat, and rename large batches of images with intelligent presets.",
+    "category": "Imaging",
+    "keywords": ("image", "resize", "batch", "optimize"),
+    "version": "2.0.0",
+    "author": "Multi-Utility Team",
+}
+
 logger = logging.getLogger(__name__)
 
 

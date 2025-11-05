@@ -7,10 +7,34 @@ import os
 import subprocess
 import tempfile
 import shutil
-import soundfile as sf
 import warnings
 import glob
 import time
+import logging
+
+try:  # pragma: no cover - optional dependency
+    import soundfile as sf
+except ImportError:  # pragma: no cover - fallback for tests
+    sf = None
+
+logger = logging.getLogger(__name__)
+
+
+def _require_soundfile():
+    if sf is None:
+        raise RuntimeError(
+            "The 'soundfile' package is required for audio separation tasks. Install soundfile to continue."
+        )
+
+PLUGIN_MANIFEST = {
+    "plugin_id": "audio-separator",
+    "name": "Audio Stem Separator",
+    "description": "Separate vocals, isolate instruments, or denoise dialogue using Demucs and DeepFilterNet.",
+    "category": "Audio",
+    "keywords": ("audio", "stems", "denoise", "demucs"),
+    "version": "2.0.0",
+    "author": "Multi-Utility Team",
+}
 
 # Suppress torchaudio AudioMetaData warning
 warnings.filterwarnings("ignore", message="`torchaudio\\.backend\\.common\\.AudioMetaData`")

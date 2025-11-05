@@ -16,12 +16,13 @@ def get_plugins_dir(default_dir="plugins"):
     return os.path.join(base_dir, default_dir)
 
 
-def load_plugins(plugin_api, plugins_dir=None):
+def load_plugins(agent, plugins_dir=None):
     if plugins_dir is None:
         plugins_dir = get_plugins_dir()
     if not os.path.exists(plugins_dir):
         logger.info(f"No plugins directory found at '{plugins_dir}'.")
         return
+    api = agent.api
     for filename in os.listdir(plugins_dir):
         if (
             filename.endswith(".py")
@@ -35,8 +36,11 @@ def load_plugins(plugin_api, plugins_dir=None):
             try:
                 with time_block(f"load_plugin:{module_name}"):
                     spec.loader.exec_module(module)
+                    manifest = getattr(module, "PLUGIN_MANIFEST", None)
+                    if manifest:
+                        api.begin_registration(manifest)
                     if hasattr(module, "register_plugin"):
-                        module.register_plugin(plugin_api)
+                        module.register_plugin(api)
                         logger.info(f"Plugin '{module_name}' loaded successfully.")
                     else:
                         logger.warning(
@@ -44,3 +48,5 @@ def load_plugins(plugin_api, plugins_dir=None):
                         )
             except Exception as e:
                 logger.error(f"Error loading plugin '{module_name}': {e}")
+            finally:
+                api.end_registration()

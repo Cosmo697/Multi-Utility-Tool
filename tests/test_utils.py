@@ -116,6 +116,16 @@ def test_plugin_manager_load_plugins(tmp_path):
     def add_tab(name, frame):
         called["name"] = name
 
-    api = types.SimpleNamespace(add_tab=add_tab)
-    plugin_manager.load_plugins(api, plugins_dir=str(plugins_dir))
+    class DummyAgent:
+        def __init__(self):
+            self.api = types.SimpleNamespace(
+                add_tab=add_tab,
+                begin_registration=lambda *a, **k: None,
+                end_registration=lambda *a, **k: None,
+            )
+
+        def register_manifest(self, manifest):
+            pass
+
+    plugin_manager.load_plugins(DummyAgent(), plugins_dir=str(plugins_dir))
     assert called["name"] == "demo"

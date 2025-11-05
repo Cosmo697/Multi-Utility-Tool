@@ -11,6 +11,16 @@ from utils.file_helpers import create_drop_area, find_files_in_folder, read_file
 from constants import VALID_EXTENSIONS
 from processors.text_processor import process_text_files
 
+PLUGIN_MANIFEST = {
+    "plugin_id": "text",
+    "name": "Text Forge",
+    "description": "Merge, cleanse, convert, and analyze large collections of text documents in one pass.",
+    "category": "Documents",
+    "keywords": ("text", "merge", "convert", "analysis"),
+    "version": "2.0.0",
+    "author": "Multi-Utility Team",
+}
+
 logger = logging.getLogger(__name__)
 
 
