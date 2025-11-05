@@ -1,8 +1,17 @@
 import threading
 import logging
-import pystray
-from pystray import MenuItem as Item, Menu
-from PIL import Image, ImageDraw
+
+try:  # pragma: no cover - optional dependency
+    import pystray
+    from pystray import MenuItem as Item, Menu
+    from PIL import Image, ImageDraw
+except ImportError:  # pragma: no cover - gracefully degrade
+    pystray = None
+    Item = Menu = None
+    Image = ImageDraw = None
+    logging.getLogger(__name__).warning(
+        "pystray or Pillow not available; tray integration disabled"
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -12,16 +21,23 @@ class TrayAgent:
 
     def __init__(self, app) -> None:
         self.app = app
-        self.icon = pystray.Icon("MUT", self._create_image(), "Multi-Utility Tool")
-        self.icon.menu = self._build_menu()
+        if pystray is None:
+            self.icon = type("NullIcon", (), {"notify": lambda *_: None, "stop": lambda *_: None})()
+        else:
+            self.icon = pystray.Icon("MUT", self._create_image(), "Multi-Utility Tool")
+            self.icon.menu = self._build_menu()
 
     def _create_image(self):
+        if Image is None:
+            return None
         image = Image.new("RGB", (64, 64), "black")
         d = ImageDraw.Draw(image)
         d.rectangle((16, 16, 48, 48), fill="white")
         return image
 
     def _build_menu(self):
+        if Menu is None:
+            return None
         preset_items = []
         for result in self.app.plugins.collect("list_presets"):
             if isinstance(result, dict):
@@ -40,6 +56,8 @@ class TrayAgent:
         return menu
 
     def show(self) -> None:
+        if pystray is None:
+            return
         threading.Thread(target=self.icon.run, daemon=True).start()
 
     def _restore(self, icon=None, item=None):

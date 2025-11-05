@@ -1,0 +1,25 @@
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I", "UP", "B", "S", "ARG", "C4"]
+ignore = ["E501"]
+exclude = [".git", "__pycache__", "build", "dist"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.coverage.run]
+branch = true
+source = ["core", "agents", "plugins", "processors", "utils"]
+
+[build-system]
+requires = ["setuptools>=60"]
+build-backend = "setuptools.build_meta"

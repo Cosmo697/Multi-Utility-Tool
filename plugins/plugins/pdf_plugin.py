@@ -8,6 +8,16 @@ from tkinter import ttk, messagebox
 from processors.pdf_processor import merge_pdfs, split_pdf
 from utils.file_helpers import create_drop_area
 
+PLUGIN_MANIFEST = {
+    "plugin_id": "pdf-tools",
+    "name": "PDF Studio",
+    "description": "Merge and split PDF documents with range presets and drag-and-drop input.",
+    "category": "Documents",
+    "keywords": ("pdf", "merge", "split"),
+    "version": "2.0.0",
+    "author": "Multi-Utility Team",
+}
+
 
 def register_plugin(plugin_api):
     tab = ttk.Frame(plugin_api.app.notebook)

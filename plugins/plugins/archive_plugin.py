@@ -7,6 +7,16 @@ from tkinter import ttk, filedialog
 from processors.archive_processor import process_archives
 from utils.file_helpers import create_drop_area
 
+PLUGIN_MANIFEST = {
+    "plugin_id": "archive",
+    "name": "Archive Manager",
+    "description": "Compress or extract archives with drag-and-drop simplicity and preset defaults.",
+    "category": "Files",
+    "keywords": ("archive", "zip", "compress", "extract"),
+    "version": "2.0.0",
+    "author": "Multi-Utility Team",
+}
+
 
 def register_plugin(plugin_api):
     tab = ttk.Frame(plugin_api.app.notebook)

@@ -9,7 +9,12 @@ def main():
 
     with time_block("app_startup"):
         app = AppCore()
-    app.root.mainloop()
+    try:
+        app.root.mainloop()
+    except KeyboardInterrupt:
+        logging.getLogger(__name__).info("Application interrupted by user")
+    finally:
+        app.shutdown()
 
 
 if __name__ == "__main__":

@@ -13,6 +13,16 @@ import asyncio
 import aiohttp
 import time
 
+PLUGIN_MANIFEST = {
+    "plugin_id": "html-to-pdf",
+    "name": "HTML to PDF",
+    "description": "Crawl documentation sites and export clean PDFs with automatic table-of-contents merging.",
+    "category": "Documents",
+    "keywords": ("html", "pdf", "crawler", "export"),
+    "version": "2.0.0",
+    "author": "Multi-Utility Team",
+}
+
 
 # Exception for cancellations
 class OperationCancelled(Exception):

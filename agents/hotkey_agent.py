@@ -1,8 +1,15 @@
 import logging
-import keyboard
 import tkinter as tk
 from tkinter import ttk, messagebox
 from utils.config_manager import load_config, save_config
+
+try:  # pragma: no cover - import guard
+    import keyboard  # type: ignore
+except ImportError:  # pragma: no cover - optional dependency
+    keyboard = None
+    logging.getLogger(__name__).warning(
+        "keyboard library not available; global hotkeys disabled"
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +23,8 @@ class HotkeyAgent:
         self.app = app
         self.hotkeys: dict[str, str] = {}
         self._load()
-        self._register_all()
+        if keyboard is not None:
+            self._register_all()
 
     def _load(self) -> None:
         cfg = load_config()
@@ -31,6 +39,8 @@ class HotkeyAgent:
 
     def _clear_hotkeys(self) -> None:
         """Remove previously registered hotkeys in a version tolerant way."""
+        if keyboard is None:
+            return
         try:
             keyboard.unhook_all_hotkeys()
         except AttributeError:
@@ -42,11 +52,16 @@ class HotkeyAgent:
             logger.debug("Failed to clear hotkeys: %s", exc)
 
     def _register_all(self) -> None:
+        if keyboard is None:
+            return
         self._clear_hotkeys()
         for hk, preset in self.hotkeys.items():
             self._register(hk, preset)
 
     def _register(self, hotkey: str, preset: str) -> None:
+        if keyboard is None:
+            logger.debug("Skipping hotkey registration for %s", hotkey)
+            return
         keyboard.add_hotkey(hotkey, lambda p=preset: self._trigger(p))
         logger.info("Registered hotkey %s for preset %s", hotkey, preset)
 
@@ -61,7 +76,8 @@ class HotkeyAgent:
 
     def remove_hotkey(self, hotkey: str) -> None:
         if hotkey in self.hotkeys:
-            keyboard.remove_hotkey(hotkey)
+            if keyboard is not None:
+                keyboard.remove_hotkey(hotkey)
             del self.hotkeys[hotkey]
             self._save()
 

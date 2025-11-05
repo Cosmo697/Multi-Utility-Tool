@@ -6,6 +6,10 @@ import tkinter as tk
 from tkinter import ttk
 from plugins.plugins import file_organizer_plugin
 
+pytestmark = pytest.mark.skipif(
+    os.environ.get("DISPLAY") in {None, ""}, reason="requires Tk display"
+)
+
 class DummyAPI:
     def trigger_hook(self, *args, **kwargs):
         pass

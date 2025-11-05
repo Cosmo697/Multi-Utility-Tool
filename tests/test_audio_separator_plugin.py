@@ -1,7 +1,12 @@
+import os
 import pytest
 import tkinter as tk
 from tkinter import ttk
 from plugins.plugins import audio_separator_plugin
+
+pytestmark = pytest.mark.skipif(
+    os.environ.get("DISPLAY") in {None, ""}, reason="requires Tk display"
+)
 
 class DummyAPI:
     def trigger_hook(self, *args, **kwargs):

@@ -7,6 +7,16 @@ from utils.file_helpers import find_files_in_folder, create_drop_area
 from constants import VALID_EXTENSIONS
 from processors.audio_processor import process_audio_files
 
+PLUGIN_MANIFEST = {
+    "plugin_id": "audio",
+    "name": "Audio Studio",
+    "description": "Batch convert, normalize, and master audio assets with reusable presets.",
+    "category": "Audio",
+    "keywords": ("audio", "conversion", "normalization", "batch"),
+    "version": "2.0.0",
+    "author": "Multi-Utility Team",
+}
+
 logger = logging.getLogger(__name__)
 
 

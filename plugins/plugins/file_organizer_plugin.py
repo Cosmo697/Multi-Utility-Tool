@@ -14,6 +14,16 @@ from processors.file_organizer_processor import (
 )
 from utils.config_manager import load_config, save_config
 
+PLUGIN_MANIFEST = {
+    "plugin_id": "file-organizer",
+    "name": "File Organizer",
+    "description": "Classify, move, rename, and deduplicate files with saved rules and automations.",
+    "category": "Files",
+    "keywords": ("files", "organize", "dedupe", "rules"),
+    "version": "2.0.0",
+    "author": "Multi-Utility Team",
+}
+
 logger = logging.getLogger(__name__)
 
 CONFIG_KEY = "file_organizer"

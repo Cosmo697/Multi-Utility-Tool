@@ -8,6 +8,16 @@ from utils.file_helpers import create_drop_area, find_files_in_folder
 from constants import VALID_EXTENSIONS
 from processors.video_processor import process_videos, join_multiple_clips
 
+PLUGIN_MANIFEST = {
+    "plugin_id": "video",
+    "name": "Video Workshop",
+    "description": "Batch transcode, extract, and stitch video content with GPU-aware presets.",
+    "category": "Video",
+    "keywords": ("video", "transcode", "extract", "gpu"),
+    "version": "2.0.0",
+    "author": "Multi-Utility Team",
+}
+
 logger = logging.getLogger(__name__)
 executor = ThreadPoolExecutor(max_workers=4)
 
