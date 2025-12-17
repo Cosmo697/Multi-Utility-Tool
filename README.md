@@ -193,3 +193,14 @@ If you encounter issues or have feature suggestions, open an issue on GitHub.
 
 © 2023-2025 Cosmo697. Licensed under the MIT License.
 
+## Performance & Scalability Notes
+
+- **Plugin discovery** runs in **O(n)** relative to the number of plugin files and avoids loading
+  items outside the configured directory for security. Each plugin load is timed and logged so
+  slow modules can be identified quickly.
+- **Task execution** is thread-pooled with exponential backoff retries and cooperative
+  cancellation; CPU-bound work scales vertically with available cores and horizontally by running
+  additional worker processes or application instances.
+- Expect lightweight memory overhead because plugins are streamed one by one instead of being
+  preloaded. Logging and metrics use iterative writes to avoid large in-memory buffers.
+
