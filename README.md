@@ -2,6 +2,16 @@
 
 The **Multi-Utility Tool** is a modular, cross-platform application for processing and organizing media and documents. With built-in **plugin support**, new features, tabs, and enhancements can be added without modifying the core code. The default tabs (**Audio, Audio Separator, Image, Text, Video, Archive, PDF Tools, File Organizer, HTML-to-PDF Converter**) are implemented as plugins.
 
+## Project Layout (Flat Package)
+
+- `src/multi_utility_tool/app.py` – CLI/UI entry point (also invokable via `python -m multi_utility_tool`).
+- `src/multi_utility_tool/core/` – application orchestration, plugin API/manifest, task manager.
+- `src/multi_utility_tool/agents/` – focused agents (logging, plugin loading, hotkeys, tray, UI) wired by `AppCore`.
+- `src/multi_utility_tool/plugins/` – first-party plugins and the plugin manager (flattened alongside plugin code for easier packaging).
+- `src/multi_utility_tool/processors/` – media/document processors used by plugins.
+- `src/multi_utility_tool/utils/` – shared helpers (config, diagnostics, file/ffmpeg utilities).
+- `tests/` – unit plus integration stubs validating the flat-package wiring.
+
 ## Features
 
 ### Plugin Architecture
@@ -192,4 +202,15 @@ If you encounter issues or have feature suggestions, open an issue on GitHub.
 ## License
 
 © 2023-2025 Cosmo697. Licensed under the MIT License.
+
+## Performance & Scalability Notes
+
+- **Plugin discovery** runs in **O(n)** relative to the number of plugin files and avoids loading
+  items outside the configured directory for security. Each plugin load is timed and logged so
+  slow modules can be identified quickly.
+- **Task execution** is thread-pooled with exponential backoff retries and cooperative
+  cancellation; CPU-bound work scales vertically with available cores and horizontally by running
+  additional worker processes or application instances.
+- Expect lightweight memory overhead because plugins are streamed one by one instead of being
+  preloaded. Logging and metrics use iterative writes to avoid large in-memory buffers.
 

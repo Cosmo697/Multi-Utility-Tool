@@ -1,4 +1,4 @@
-from processors import audio_processor
+from multi_utility_tool.processors import audio_processor
 import tempfile
 import os
 

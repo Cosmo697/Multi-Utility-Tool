@@ -6,7 +6,11 @@ import time
 
 import pytest
 
-from core.task_manager import TaskCancelledError, TaskManager, TaskTimeoutError
+from multi_utility_tool.core.task_manager import (
+    TaskCancelledError,
+    TaskManager,
+    TaskTimeoutError,
+)
 
 
 def test_task_manager_completes_simple_task():

@@ -18,9 +18,9 @@ if "yaml" not in sys.modules:
     yaml_stub = types.SimpleNamespace(safe_load=_load, dump=_dump)
     sys.modules["yaml"] = yaml_stub
 
-from utils import config_manager, diagnostics, file_helpers, ffmpeg_helpers
-from core import hooks
-from plugins import plugin_manager
+from multi_utility_tool.utils import config_manager, diagnostics, file_helpers, ffmpeg_helpers
+from multi_utility_tool.core import hooks
+from multi_utility_tool.plugins import plugin_manager
 
 
 def test_config_manager_load_save(tmp_path):

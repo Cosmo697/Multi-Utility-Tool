@@ -1,4 +1,4 @@
-from processors import video_processor
+from multi_utility_tool.processors import video_processor
 import tempfile
 import os
 

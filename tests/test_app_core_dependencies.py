@@ -4,9 +4,9 @@ from queue import Queue
 
 import pytest
 
-from core import app_core as app_core_module
-from core.app_core import AppCore
-from utils.health_checks import DependencyStatus
+from multi_utility_tool.core import app_core as app_core_module
+from multi_utility_tool.core.app_core import AppCore
+from multi_utility_tool.utils.health_checks import DependencyStatus
 
 
 class DummyRoot:

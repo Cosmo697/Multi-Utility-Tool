@@ -1,5 +1,5 @@
 import os
-from utils.file_helpers import ensure_file_output_dir
+from multi_utility_tool.utils.file_helpers import ensure_file_output_dir
 
 def test_ensure_file_output_dir_creates_dir(tmp_path):
     dummy_file = tmp_path / "dummy.txt"

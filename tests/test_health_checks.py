@@ -1,4 +1,8 @@
-from utils.health_checks import DependencyStatus, check_dependencies, summarize_failures
+from multi_utility_tool.utils.health_checks import (
+    DependencyStatus,
+    check_dependencies,
+    summarize_failures,
+)
 
 
 def test_check_dependencies_detects_missing_and_present(monkeypatch):

@@ -1,5 +1,5 @@
 import logging
-from utils import logging_config
+from multi_utility_tool.utils import logging_config
 
 def test_logging_config_sets_rotating_handler():
     logging_config.setup_logging()

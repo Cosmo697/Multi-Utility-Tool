@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from utils import config_manager
+from multi_utility_tool.utils import config_manager
 
 def test_config_file_location():
     path = config_manager.CONFIG_FILE

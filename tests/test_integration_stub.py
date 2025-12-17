@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from core.app_core import AppCore
-from core.plugin_manifest import PluginManifest
+from multi_utility_tool.core.app_core import AppCore
+from multi_utility_tool.core.plugin_manifest import PluginManifest
 
 
 def test_headless_plugin_registration():

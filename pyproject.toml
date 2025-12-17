@@ -18,7 +18,11 @@ filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.coverage.run]
 branch = true
-source = ["core", "agents", "plugins", "processors", "utils"]
+source = ["multi_utility_tool"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["multi_utility_tool*"]
 
 [build-system]
 requires = ["setuptools>=60"]

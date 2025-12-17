@@ -1,4 +1,4 @@
-from core.app_core import AppCore
+from multi_utility_tool.core.app_core import AppCore
 
 
 def _make_app():
