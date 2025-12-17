@@ -19,9 +19,10 @@ class PluginAgent:
         # maintain backward compatibility with old code
         self.app.plugin_api = self.api
         self.manifests: dict[str, PluginManifest] = {}
+        self.load_results = []
         logger.info("Loading plugins")
         if autoload:
-            load_plugins(self)
+            self.load_results = load_plugins(self)
 
     def trigger(self, hook: str, *args, **kwargs) -> None:
         self.hooks.trigger(hook, *args, **kwargs)
