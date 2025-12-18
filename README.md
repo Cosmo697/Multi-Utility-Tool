@@ -46,6 +46,18 @@ Core functionality is organized into small **agents** in the `agents/` package. 
 
 ## Installation
 
+### Automated setup
+
+For a production-ready bootstrap (lint, tests, smoke run), execute:
+
+```sh
+bash scripts/setup_and_run.sh
+```
+
+The script creates an isolated `.venv`, installs runtime and developer
+dependencies, runs Ruff lint checks, executes the test suite, and performs a
+headless smoke launch to verify the build end-to-end.
+
 1. Clone the Repository:
    ```sh
    git clone https://github.com/Cosmo697/Multi-Utility-Tool.git
@@ -69,6 +81,11 @@ Core functionality is organized into small **agents** in the `agents/` package. 
    pip install -r requirements.txt
    ```
 
+5. (Recommended) Install developer tooling for linting:
+   ```sh
+   pip install "ruff>=0.5"
+   ```
+
 ## Running the App
 
 With the virtual environment activated, launch the app:
@@ -76,6 +93,28 @@ With the virtual environment activated, launch the app:
    python app.py
    ```
 The main window will open with **tabs for Audio, Audio Separator, Image, Text, Video, Archive, PDF Tools, File Organizer, and HTML-to-PDF Converter**.
+
+### CLI and headless usage
+
+The entrypoint enforces validated configuration and secure defaults. Useful
+flags include:
+
+- `--headless`: run without rendering the UI (used for automation and CI).
+- `--no-hotkeys` / `--no-tray`: disable global hooks when running in sandboxed
+  environments.
+- `--workers <int>`: override the TaskManager pool size.
+- `--plugin-dir <path>`: point to a curated plugin folder (validated to exist).
+- `--log-level <LEVEL>`: choose from DEBUG, INFO, WARNING, ERROR, CRITICAL.
+
+Examples:
+
+```sh
+python app.py --headless --no-hotkeys --no-tray
+python app.py --plugin-dir /opt/mut/plugins --log-level DEBUG
+```
+
+At shutdown, the app flushes usage metrics to `logs/metrics.jsonl` to aid
+observability without holding large in-memory buffers.
 
 ## Plugin System Overview
 
@@ -203,4 +242,11 @@ If you encounter issues or have feature suggestions, open an issue on GitHub.
   additional worker processes or application instances.
 - Expect lightweight memory overhead because plugins are streamed one by one instead of being
   preloaded. Logging and metrics use iterative writes to avoid large in-memory buffers.
+
+**Throughput expectations**: the task pool defaults to 2x CPU cores (min 4) and
+handles submissions in `O(1)` per task. Background retries use exponential
+backoff with upper bounds to avoid thundering herds. IO-heavy plugins (e.g.,
+HTML-to-PDF) benefit from vertical scaling (more CPU/memory), while plugin
+isolation allows horizontal scaling by running multiple headless instances with
+curated plugin directories.
 
