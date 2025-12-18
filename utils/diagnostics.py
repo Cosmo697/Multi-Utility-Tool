@@ -1,8 +1,16 @@
-"""Utilities for lightweight diagnostics and timing."""
+"""Utilities for lightweight diagnostics, timing, and metrics emission.
+
+Hot path complexity: usage increments are ``O(1)`` and metrics emission writes
+single JSON lines to avoid buffering large payloads in memory.
+"""
 
 import logging
+import json
+from pathlib import Path
 import time
 from contextlib import contextmanager
+from datetime import datetime, timezone
+from typing import Any, Mapping
 
 logger = logging.getLogger("diagnostics")
 
@@ -18,6 +26,34 @@ def increment_usage(name: str) -> None:
 def get_usage_stats() -> dict:
     """Return a copy of the current usage statistics."""
     return dict(_usage_counts)
+
+
+def emit_metrics_snapshot(
+    *,
+    path: str | Path = "logs/metrics.jsonl",
+    extra: Mapping[str, Any] | None = None,
+) -> dict:
+    """Persist a metrics snapshot to a JSONL file.
+
+    Metrics are appended to avoid rewriting the file and to keep I/O streaming
+    friendly for production usage. The payload always includes an ISO8601 UTC
+    timestamp and the current usage counters.
+    """
+
+    payload = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "usage": get_usage_stats(),
+    }
+    if extra:
+        payload.update(dict(extra))
+
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, ensure_ascii=False))
+        handle.write("\n")
+    logger.debug("Metrics snapshot written to %s", target)
+    return payload
 
 
 @contextmanager

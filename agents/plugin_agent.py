@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class PluginAgent:
     """Manage hooks and load plugins."""
 
-    def __init__(self, app, autoload: bool = True) -> None:
+    def __init__(self, app, autoload: bool = True, plugins_dir: str | None = None) -> None:
         self.app = app
         self.hooks = Hooks()
         # expose hooks to the application for PluginAPI compatibility
@@ -20,9 +20,10 @@ class PluginAgent:
         self.app.plugin_api = self.api
         self.manifests: dict[str, PluginManifest] = {}
         self.load_results = []
+        self.plugins_dir = plugins_dir
         logger.info("Loading plugins")
         if autoload:
-            self.load_results = load_plugins(self)
+            self.load_results = load_plugins(self, plugins_dir=self.plugins_dir)
 
     def trigger(self, hook: str, *args, **kwargs) -> None:
         self.hooks.trigger(hook, *args, **kwargs)

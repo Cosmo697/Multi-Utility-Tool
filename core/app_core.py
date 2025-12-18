@@ -33,8 +33,10 @@ class AppCore:
         worker_count: int | None = None,
         load_plugins: bool = True,
         dependencies: Sequence[tuple[str, bool]] | None = None,
+        log_level: int = logging.INFO,
+        plugin_dir: str | None = None,
     ) -> None:
-        self.logger_agent = LoggerAgent()
+        self.logger_agent = LoggerAgent(level=log_level)
         self.logger = logging.getLogger("app")
         self.tasks = TaskManager(max_workers=worker_count)
         self.headless = headless
@@ -45,7 +47,7 @@ class AppCore:
         self.ui = UIAgent(self, headless=headless)
         self.root = self.ui.root
         self.notebook = self.ui.notebook  # Expose notebook for legacy plugins
-        self.plugins = PluginAgent(self, autoload=load_plugins)
+        self.plugins = PluginAgent(self, autoload=load_plugins, plugins_dir=plugin_dir)
         self.hotkeys = (
             HotkeyAgent(self) if enable_hotkeys and not headless else NullHotkeyAgent(self)
         )
